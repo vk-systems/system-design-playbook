@@ -32,45 +32,79 @@
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dark .glass {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .system-card:hover .icon-box {
-            transform: scale(1.1) rotate(5deg);
+            transform: scale(1.05) rotate(2deg);
             background-color: #2563eb;
             color: white;
         }
 
+        /* Prose styles for deep dark mode */
         .prose h2 { font-weight: 800; font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; color: #0f172a; border-left: 4px solid #2563eb; padding-left: 1rem; }
+        .dark .prose h2 { color: #ffffff; border-left-color: #3b82f6; }
+        
         .prose h3 { font-weight: 700; font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #1e293b; }
+        .dark .prose h3 { color: #f4f4f5; }
+
         .prose p { margin-bottom: 1.25rem; line-height: 1.75; color: #475569; }
+        .dark .prose p { color: #a1a1aa; }
+
         .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
-        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.2rem 0.4rem; rounded: 0.25rem; font-size: 0.9em; }
+        .dark .prose ul { color: #a1a1aa; }
+
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.9em; }
+        .dark .prose code { background: #27272a; color: #60a5fa; }
+        
+        .bit-box {
+            display: flex;
+            background: #09090b;
+            color: #d4d4d8;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            border: 1px solid #27272a;
+        }
+
+        /* Blueprint SVG Styles */
+        .bp-node { transition: all 0.2s; cursor: pointer; }
+        .bp-node:hover rect { stroke: #2563eb; stroke-width: 3; filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.3)); }
+        .bp-node text { pointer-events: none; }
+        
+        .inline-link {
+            color: #2563eb;
+            font-weight: 700;
+            cursor: pointer;
+            border-bottom: 2px solid rgba(37, 99, 235, 0.2);
+            transition: all 0.2s;
+        }
+        .inline-link:hover {
+            background: rgba(37, 99, 235, 0.05);
+            border-bottom-color: #2563eb;
+        }
+        
+        /* Hero Pattern Background */
+        .grid-pattern {
+            background-image: radial-gradient(rgba(37, 99, 235, 0.1) 1px, transparent 0);
+            background-size: 40px 40px;
+        }
+        .dark .grid-pattern {
+            background-image: radial-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 0);
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans antialiased">
-
-    <!-- Mobile Search Overlay -->
-    <div id="mobileSearchOverlay" class="fixed inset-0 z-[60] bg-slate-900 hidden flex flex-col p-6">
-        <div class="flex items-center justify-between mb-8">
-            <span class="font-bold text-white tracking-widest uppercase text-xs">Search Blueprints</span>
-            <button onclick="toggleMobileSearch()" class="text-slate-400 hover:text-white p-2">
-                <i data-lucide="x" class="w-8 h-8"></i>
-            </button>
-        </div>
-        <div class="relative">
-            <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500"></i>
-            <input 
-                type="text" 
-                id="mobileSearchInput"
-                placeholder="LSM, Sharding, Consistency..." 
-                class="w-full bg-slate-800 border border-slate-700 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-        </div>
-    </div>
+<body class="bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans antialiased transition-colors duration-500">
 
     <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md text-white border-b border-slate-800">
+    <nav class="sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md text-zinc-900 dark:text-white border-b border-zinc-200 dark:border-zinc-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center gap-3 cursor-pointer" onclick="showCatalog()">
@@ -79,91 +113,70 @@
                     </div>
                     <div class="flex flex-col">
                         <span class="font-bold text-base leading-none tracking-tight uppercase">Basecase</span>
-                        <span class="text-[9px] text-blue-400 uppercase tracking-widest font-bold mt-1">Architecture GUIDE</span>
+                        <span class="text-[9px] text-blue-600 dark:text-blue-400 uppercase tracking-widest font-bold mt-1">Architecture GUIDE</span>
                     </div>
                 </div>
-
-                <div class="hidden md:flex flex-1 max-w-lg mx-12">
-                    <div class="relative w-full">
-                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"></i>
-                        <input type="text" id="systemSearch" placeholder="Search blueprints..." class="w-full bg-slate-800 border border-slate-700 rounded-2xl py-2.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-white placeholder:text-slate-500" />
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <button onclick="toggleMobileSearch()" class="md:hidden p-2 text-slate-400">
-                        <i data-lucide="search" class="w-6 h-6"></i>
+                
+                <div class="flex items-center gap-2 md:gap-4">
+                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-blue-600 transition-all" id="themeToggle">
+                        <i data-lucide="moon" class="w-5 h-5"></i>
                     </button>
-                    <a href="https://github.com" class="p-2 text-slate-400 hover:text-white" target="_blank">
-                        <i data-lucide="github" class="w-6 h-6"></i>
-                    </a>
+                    <a href="#" class="p-2 text-zinc-500 dark:text-zinc-400 hover:text-blue-600"><i data-lucide="github" class="w-6 h-6"></i></a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Content Area -->
+    <!-- Main Content Wrapper -->
     <div id="mainContent">
-        <!-- Hero Section -->
-        <header id="catalogHero" class="bg-white border-b border-slate-200 pt-12 md:pt-20 pb-16 md:pb-24 px-4 overflow-hidden relative">
-            <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[500px] h-[500px] bg-blue-50 rounded-full blur-3xl opacity-50"></div>
-            <div class="max-w-7xl mx-auto text-center lg:text-left">
-                <h1 class="text-4xl md:text-7xl font-black text-slate-900 mb-6 tracking-tight">Architect's <br/><span class="text-blue-600 italic">Decision Logs.</span></h1>
-                <p class="text-slate-600 text-lg md:text-xl max-w-2xl mb-8 font-medium leading-relaxed">Documenting the mechanics of distributed primitives and hyperscale systems.</p>
-                <div class="flex flex-wrap justify-center lg:justify-start gap-4">
-                    <a href="#catalog" class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-blue-600 transition-all shadow-xl active:scale-95 inline-block">Explore Catalog</a>
-                    <div class="px-6 py-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-3">
-                        <div class="flex -space-x-2">
-                            <div class="w-6 h-6 rounded-full bg-blue-500 border-2 border-white"></div>
-                            <div class="w-6 h-6 rounded-full bg-emerald-500 border-2 border-white"></div>
-                            <div class="w-6 h-6 rounded-full bg-amber-500 border-2 border-white"></div>
+        <header id="catalogHero" class="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 pt-20 md:pt-32 pb-24 md:pb-36 px-4 overflow-hidden relative grid-pattern transition-colors duration-500">
+            <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[120px] opacity-60"></div>
+            
+            <div class="max-w-7xl mx-auto text-center lg:text-left relative z-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 mb-8">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                    </span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">Systems Lab v1.6</span>
+                </div>
+                
+                <h1 class="text-6xl md:text-9xl font-black text-zinc-900 dark:text-white mb-10 tracking-tighter leading-[0.9]">Architect's <br/><span class="text-blue-600 dark:text-blue-500 italic">Decision Logs.</span></h1>
+                
+                <div class="max-w-3xl">
+                    <p class="text-zinc-600 dark:text-zinc-400 text-xl md:text-3xl mb-12 font-medium leading-tight tracking-tight text-balance">Deconstructing the engineering logic behind <span class="text-zinc-900 dark:text-zinc-100 font-bold underline decoration-blue-500/30 italic">high-scale primitives</span> and <span class="text-zinc-900 dark:text-zinc-100 font-bold underline decoration-blue-500/30 italic">distributed systems.</span></p>
+                    
+                    <div class="flex flex-wrap justify-center lg:justify-start gap-12 border-t border-zinc-100 dark:border-zinc-800 pt-10">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-black uppercase text-zinc-400 dark:text-zinc-600 tracking-[0.2em] mb-2">Systems Perspective</span>
+                            <span class="text-xs font-bold text-zinc-500 dark:text-zinc-400">Availability • Reliability • Performance</span>
                         </div>
-                        <span class="text-xs font-black text-slate-400 uppercase tracking-widest">3 Blueprints Documented</span>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-black uppercase text-zinc-400 dark:text-zinc-600 tracking-[0.2em] mb-2">Core Domains</span>
+                            <span class="text-xs font-bold text-zinc-500 dark:text-zinc-400">Storage Engines • Consensus • Global Infrastructure</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- Catalog View -->
         <div id="catalogView">
-            <div id="catalog" class="bg-slate-50 border-b border-slate-200 sticky top-20 z-40">
-                <div class="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
-                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                        <button onclick="filterSystems('all')" class="filter-btn active whitespace-nowrap px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase border-2 bg-slate-900 text-white border-slate-900 transition-all">All</button>
-                        <button onclick="filterSystems('Distributed')" class="filter-btn whitespace-nowrap px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase border-2 bg-white border-slate-200 text-slate-500 hover:border-blue-500 transition-all">Distributed</button>
-                        <button onclick="filterSystems('Storage')" class="filter-btn whitespace-nowrap px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase border-2 bg-white border-slate-200 text-slate-500 hover:border-blue-500 transition-all">Storage</button>
-                        <button onclick="filterSystems('Networking')" class="filter-btn whitespace-nowrap px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase border-2 bg-white border-slate-200 text-slate-500 hover:border-blue-500 transition-all">Networking</button>
-                    </div>
-                </div>
-            </div>
-
-            <main class="max-w-7xl mx-auto px-4 py-16">
-                <div id="systemsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
+            <main class="max-w-7xl mx-auto px-4 py-20">
+                <div id="systemsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </main>
         </div>
 
-        <!-- Detail View (Hidden by Default) -->
-        <div id="detailView" class="hidden max-w-5xl mx-auto px-4 py-12">
-            <button onclick="showCatalog()" class="mb-12 flex items-center gap-2 text-slate-500 hover:text-blue-600 font-bold text-xs uppercase tracking-widest transition-colors group">
-                <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i> Back to Catalog
+        <div id="detailView" class="hidden max-w-6xl mx-auto px-4 py-16">
+            <button onclick="showCatalog()" class="mb-12 flex items-center gap-3 text-zinc-500 dark:text-zinc-400 hover:text-blue-600 font-bold text-xs uppercase tracking-widest transition-colors group">
+                <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-2"></i> Back to Catalog
             </button>
-            <div id="detailContent" class="bg-white rounded-[3rem] border border-slate-200 p-8 md:p-16 shadow-xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-8 opacity-5">
-                    <i data-lucide="layout" class="w-64 h-64"></i>
-                </div>
-                <!-- Content injected here -->
+            <div id="detailContent" class="bg-white dark:bg-zinc-950 rounded-[3rem] border border-zinc-200 dark:border-zinc-800 p-8 md:p-20 shadow-2xl relative transition-colors duration-500">
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-12 text-center">
-        <div class="flex justify-center gap-6 mb-8 text-slate-300">
-            <i data-lucide="database" class="w-5 h-5"></i>
-            <i data-lucide="shield" class="w-5 h-5"></i>
-            <i data-lucide="cpu" class="w-5 h-5"></i>
-        </div>
-        <p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">&copy; 2024 Basecase Architecture Lab</p>
+    <footer class="bg-zinc-50 dark:bg-black border-t border-zinc-200 dark:border-zinc-900 py-16 text-center transition-colors duration-500">
+        <p class="text-[10px] text-zinc-400 dark:text-zinc-600 font-black uppercase tracking-[0.3em]">&copy; 2024 Basecase Architecture Lab</p>
     </footer>
 
     <script>
@@ -173,80 +186,144 @@
                 title: "Global Sequencer",
                 category: "Distributed",
                 icon: "cpu",
-                description: "High-throughput unique ID generation at 10M+ TPS. Leverages Snowflake algorithms and LSM-Tree storage.",
-                stack: ["Snowflake", "LSM-Tree", "gRPC", "Etcd"],
-                metrics: "10M+ TPS | <1ms",
+                description: "High-throughput unique ID generation using the Snowflake algorithm.",
+                stack: ["Snowflake-ID", "Rust", "gRPC", "Etcd"],
+                metrics: "10M+ TPS",
                 status: "Live",
                 adr: {
-                    problem: "Modern hyperscale systems (like Twitter or Discord) require billions of unique identifiers daily. Using standard 128-bit UUIDs causes index bloating in databases (B-Tree performance degradation), and centralized databases (Auto-Increment) create a single point of failure that cannot scale horizontally beyond a few thousand writes per second.",
-                    context: "The system must generate IDs that are 64-bit (compact for storage), roughly time-sortable (to aid database indexing), and require zero coordination between generator nodes for every request to minimize latency.",
-                    decision: "Implement a Snowflake-inspired bitmasking approach. Each 64-bit ID is structured as follows: [1-bit Unused][41-bit Timestamp][10-bit NodeID][12-bit Sequence]. This allows for 4,096 IDs per millisecond, per node, for up to 1,024 nodes.",
-                    architecture: "Nodes are assigned a unique 10-bit ID via Etcd during startup. The timestamp part ensures monotonicity over a 69-year epoch. To ensure durability of the Sequence counter during node crashes, we use an LSM-Tree write-ahead log with batching.",
-                    consequences: "Total elimination of central ID generation bottlenecks. IDs can be generated locally in-memory without a network round-trip. Trade-off: Vulnerability to 'Clock Skew' where nodes with lagging clocks could potentially issue conflicting IDs (mitigated via NTP/PTP synchronization checks)."
-                }
+                    problem: "Generating billions of sortable 64-bit IDs without a central bottleneck or database lock.",
+                    context: "This system relies on three pillars: <span class='inline-link' onclick='showDetail(\"distributed-consensus\")'>Consensus</span> for node coordination, bit-masking for speed, and <span class='inline-link' onclick='showDetail(\"lsm-tree\")'>LSM-Trees</span> for sequence durability.",
+                    decision: "We implemented a Snowflake generator. Below is the interactive blueprint showing how these sub-systems interact.",
+                    architecture: `
+                        <div class="my-12 p-8 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-inner">
+                            <h4 class="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-8">Interactive Blueprint</h4>
+                            <svg viewBox="0 0 600 340" class="w-full h-auto drop-shadow-xl">
+                                <g class="bp-node" onclick="showDetail('global-sequencer')">
+                                    <rect x="200" y="20" width="200" height="70" rx="12" class="fill-white dark:fill-zinc-800 stroke-zinc-200 dark:stroke-zinc-700" stroke-width="2"/>
+                                    <text x="300" y="60" text-anchor="middle" class="font-black text-sm fill-zinc-900 dark:fill-white">Sequencer Node</text>
+                                </g>
+                                <path d="M300 90 V 160" class="stroke-zinc-300 dark:stroke-zinc-700" stroke-width="2" fill="none" stroke-dasharray="4"/>
+                                <path d="M300 160 H 100 V 220" class="stroke-zinc-300 dark:stroke-zinc-700" stroke-width="2" fill="none" stroke-dasharray="4"/>
+                                <path d="M300 160 H 500 V 220" class="stroke-zinc-300 dark:stroke-zinc-700" stroke-width="2" fill="none" stroke-dasharray="4"/>
+                                <g class="bp-node" onclick="showDetail('distributed-consensus')">
+                                    <rect x="25" y="220" width="150" height="60" rx="12" class="fill-white dark:fill-zinc-800 stroke-zinc-200 dark:stroke-zinc-700" stroke-width="2"/>
+                                    <text x="100" y="255" text-anchor="middle" class="font-bold text-xs fill-blue-600 dark:fill-blue-400">Consensus (Etcd)</text>
+                                </g>
+                                <g class="bp-node" onclick="showDetail('bloom-filter')">
+                                    <rect x="225" y="220" width="150" height="60" rx="12" class="fill-white dark:fill-zinc-800 stroke-zinc-200 dark:stroke-zinc-700" stroke-width="2"/>
+                                    <text x="300" y="255" text-anchor="middle" class="font-bold text-xs fill-blue-600 dark:fill-blue-400">Bloom Filter</text>
+                                </g>
+                                <g class="bp-node" onclick="showDetail('lsm-tree')">
+                                    <rect x="425" y="220" width="150" height="60" rx="12" class="fill-white dark:fill-zinc-800 stroke-zinc-200 dark:stroke-zinc-700" stroke-width="2"/>
+                                    <text x="500" y="255" text-anchor="middle" class="font-bold text-xs fill-blue-600 dark:fill-blue-400">LSM-Tree Storage</text>
+                                </g>
+                            </svg>
+                        </div>
+                        <h3>Implementation Detail</h3>
+                        <p>When the <code>Sequencer Node</code> starts, it uses <span class="inline-link" onclick="showDetail('distributed-consensus')">Distributed Consensus</span> to claim a unique Machine ID. During operation, it checks a <span class="inline-link" onclick="showDetail('bloom-filter')">Bloom Filter</span> for ID existence before committing the sequence to an <span class="inline-link" onclick="showDetail('lsm-tree')">LSM-Tree</span> based WAL (Write Ahead Log).</p>
+                    `,
+                    consequences: "Achieved zero-coordination ID generation."
+                },
+                externalLinks: [
+                    { name: "Twitter Engineering: Announcing Snowflake", url: "https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake.html" },
+                    { name: "Standard Snowflake Crate (Rust)", url: "https://crates.io/crates/snowflake" }
+                ]
             },
             {
-                id: "rate-limiter",
-                title: "Edge Rate Limiter",
-                category: "Networking",
-                icon: "shield",
-                description: "Distributed rate-limiting at the edge. Implements Sliding Window Logs with Redis synchronization for global consistency.",
-                stack: ["Redis", "Lua", "Envoy", "Token Bucket"],
-                metrics: "Global Sync | <5ms",
-                status: "Draft",
+                id: "distributed-consensus",
+                title: "Distributed Consensus",
+                category: "Distributed",
+                icon: "users",
+                description: "Ensuring state machine consistency across distributed nodes via Raft.",
+                stack: ["Raft", "Log Replication", "Quorum"],
+                metrics: "CP (Consistency)",
+                status: "Live",
                 adr: {
-                    problem: "Protecting public APIs from volumetric attacks and 'noisy neighbor' scenarios in multi-tenant environments.",
-                    context: "Traditional Fixed-Window counters allow double the allowed traffic at window boundaries (the 'Burst' problem). We need a solution that is accurate at the millisecond level.",
-                    decision: "Adopted a Sliding Window Log approach stored in Redis, executed via server-side Lua scripts to ensure atomicity and minimize network round-trips.",
-                    architecture: "A sidecar proxy (Envoy) intercepts incoming traffic. It communicates with a local Redis replica which periodically syncs with a global primary to maintain eventually consistent rate limits.",
-                    consequences: "Effective protection against bursty traffic. Trade-off: Global consistency lag can occasionally allow slight over-limit bursts during partition events."
-                }
+                    problem: "Agreeing on a value in a cluster where nodes fail and network partitions occur.",
+                    context: "Consensus ensures that a majority of nodes agree on the state before it is committed.",
+                    decision: "We utilize the <strong>Raft Algorithm</strong> for its focus on understandability and formal safety guarantees.",
+                    architecture: "Leaders manage the log and heartbeat followers. If a leader fails, a new term begins via randomized timeout election.",
+                    consequences: "Guarantees strong consistency at the cost of majority network round-trip latency."
+                },
+                externalLinks: [
+                    { name: "The Raft Consensus Algorithm Official Site", url: "https://raft.github.io/" },
+                    { name: "In Search of an Understandable Consensus Algorithm (PDF)", url: "https://raft.github.io/raft.pdf" }
+                ]
             },
             {
-                id: "metrics-pipeline",
-                title: "Real-time Metrics",
+                id: "bloom-filter",
+                title: "Bloom Filter",
                 category: "Storage",
-                icon: "bar-chart-3",
-                description: "High-cardinality telemetry processing using Columnar storage and vectorized query execution.",
-                stack: ["Kafka", "ClickHouse", "Protobuf", "Grafana"],
-                metrics: "1B+ Rows/Day",
+                icon: "filter",
+                description: "Probabilistic set membership to avoid unnecessary disk seeks.",
+                stack: ["Bitset", "MurmurHash"],
+                metrics: "O(k) Lookup",
                 status: "Live",
                 adr: {
-                    problem: "Ingesting and querying massive telemetry streams with high-cardinality dimensions (e.g., millions of unique container IDs).",
-                    context: "Real-time visibility is required for SRE teams; delays in observability mean longer MTTR (Mean Time To Recovery).",
-                    decision: "Implemented a Kappa architecture using Kafka as the ingestion buffer and ClickHouse as the primary OLAP storage engine.",
-                    architecture: "Raw Protobuf events are ingested into Kafka. A custom consumer performs lightweight enrichment before bulk-inserting into ClickHouse tables using the MergeTree engine family.",
-                    consequences: "Sub-second query response on multi-billion row datasets. Major benefit: Native support for materialized views for real-time aggregation."
-                }
+                    problem: "Determining if a key exists in an <span class='inline-link' onclick='showDetail(\"lsm-tree\")'>LSM-Tree</span> without scanning multiple files on disk.",
+                    context: "Disk I/O is expensive. A Bloom Filter lives in RAM and provides a probabilistic existence check.",
+                    decision: "Implement a tiered bitset to avoid checking cold storage for sequence collisions.",
+                    architecture: "Uses k-independent hash functions to map values to a bitset of size m.",
+                    consequences: "Sub-millisecond membership testing."
+                },
+                externalLinks: [
+                    { name: "Bloom Filters: A Classic Deep Dive", url: "https://en.wikipedia.org/wiki/Bloom_filter" },
+                    { name: "Cloudflare: When Bloom Filters don't bloom", url: "https://blog.cloudflare.com/when-bloom-filters-dont-bloom/" },
+                    { name: "Interactive Bloom Filter Visualizer", url: "https://llimllib.github.io/bloomfilter-tutorial/" }
+                ]
+            },
+            {
+                id: "lsm-tree",
+                title: "LSM-Tree Storage",
+                category: "Storage",
+                icon: "database",
+                description: "Write-optimized storage engine designed for high-throughput sequential inserts.",
+                stack: ["Memtable", "SSTables", "Compaction"],
+                metrics: "Write-Heavy",
+                status: "Live",
+                adr: {
+                    problem: "Handling high volume of random writes which would fragment a B-Tree index.",
+                    context: "LSM-Trees convert random writes into sequential disk I/O, which is orders of magnitude faster on SSDs.",
+                    decision: "Updates are buffered in a Memtable and flushed as immutable SSTables.",
+                    architecture: "Multiple SSTable levels are merged via background compaction to reclaim space.",
+                    consequences: "Exceptional write throughput for sequence persistence."
+                },
+                externalLinks: [
+                    { name: "The Log-Structured Merge-Tree (Original Paper)", url: "https://www.cs.umb.edu/~poneil/lsmtree.pdf" },
+                    { name: "RocksDB: A Persistent Key-Value Store for Fast Storage", url: "http://rocksdb.org/" },
+                    { name: "Cassandra Architecture: Storage Engine Deep Dive", url: "https://cassandra.apache.org/doc/stable/cassandra/architecture/storage-engine.html" }
+                ]
             }
         ];
 
-        let currentFilter = 'all';
-        let currentSearch = '';
+        let isDarkMode = false;
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            const html = document.documentElement;
+            const themeToggle = document.getElementById('themeToggle');
+            if (isDarkMode) {
+                html.classList.add('dark');
+                themeToggle.innerHTML = '<i data-lucide="sun" class="w-5 h-5"></i>';
+            } else {
+                html.classList.remove('dark');
+                themeToggle.innerHTML = '<i data-lucide="moon" class="w-5 h-5"></i>';
+            }
+            lucide.createIcons();
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        }
 
         function renderSystems() {
             const grid = document.getElementById('systemsGrid');
-            const filtered = SYSTEMS.filter(sys => {
-                const matchesFilter = currentFilter === 'all' || sys.category === currentFilter;
-                const matchesSearch = sys.title.toLowerCase().includes(currentSearch) || 
-                                     sys.description.toLowerCase().includes(currentSearch);
-                return matchesFilter && matchesSearch;
-            });
-
-            grid.innerHTML = filtered.map(sys => `
-                <div class="system-card bg-white rounded-[2.5rem] border border-slate-200 p-8 flex flex-col h-full hover:-translate-y-2 transition-all duration-300 hover:shadow-xl group">
-                    <div class="flex justify-between items-start mb-8">
-                        <div class="icon-box w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 transition-all">
-                            <i data-lucide="${sys.icon}"></i>
-                        </div>
-                        <span class="text-[8px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest border ${sys.status === 'Live' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'}">
-                            ${sys.status}
-                        </span>
+            grid.innerHTML = SYSTEMS.map(sys => `
+                <div class="system-card bg-white dark:bg-zinc-900/50 rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 p-8 flex flex-col h-full hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl dark:hover:bg-zinc-900 group">
+                    <div class="icon-box w-14 h-14 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center text-zinc-600 dark:text-zinc-400 mb-8 transition-all">
+                        <i data-lucide="${sys.icon}"></i>
                     </div>
-                    <h3 class="text-2xl font-black text-slate-900 mb-3 tracking-tight">${sys.title}</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-10 font-medium">${sys.description}</p>
-                    <div class="mt-auto pt-6 border-t border-slate-50">
-                        <button onclick="showDetail('${sys.id}')" class="w-full bg-slate-900 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg active:scale-95">
+                    <h3 class="text-2xl font-black text-zinc-900 dark:text-white mb-3 tracking-tight">${sys.title}</h3>
+                    <p class="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mb-10 font-medium">${sys.description}</p>
+                    <div class="mt-auto pt-6 border-t border-zinc-100 dark:border-zinc-800">
+                        <button onclick="showDetail('${sys.id}')" class="w-full bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 dark:hover:bg-blue-500 dark:hover:text-white transition-all shadow-lg active:scale-95">
                             Read Design Logic
                         </button>
                     </div>
@@ -255,73 +332,67 @@
             lucide.createIcons();
         }
 
-        function filterSystems(cat) {
-            currentFilter = cat;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('bg-slate-900', 'text-white', 'border-slate-900');
-                btn.classList.add('bg-white', 'text-slate-500', 'border-slate-200');
-                if(btn.innerText.toLowerCase() === cat.toLowerCase()) {
-                    btn.classList.add('bg-slate-900', 'text-white', 'border-slate-900');
-                    btn.classList.remove('bg-white', 'text-slate-500', 'border-slate-200');
-                }
-            });
-            renderSystems();
-        }
-
         function showDetail(id) {
             const sys = SYSTEMS.find(s => s.id === id);
+            if(!sys) return;
+
             const view = document.getElementById('detailView');
             const catalog = document.getElementById('catalogView');
             const hero = document.getElementById('catalogHero');
             const content = document.getElementById('detailContent');
 
             content.innerHTML = `
-                <div class="flex flex-col md:flex-row justify-between items-start gap-8 mb-16 pb-12 border-b border-slate-100">
+                <div class="flex flex-col md:flex-row justify-between items-start gap-8 mb-16 pb-12 border-b border-zinc-100 dark:border-zinc-800">
                     <div class="max-w-2xl">
-                        <div class="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-widest mb-6">Architectural Decision Record</div>
-                        <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight">${sys.title}</h1>
-                    </div>
-                    <div class="flex flex-col gap-3">
-                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 min-w-[140px]">
-                            <p class="text-[9px] uppercase font-black text-slate-400 tracking-widest mb-1">Current Status</p>
-                            <p class="text-sm font-bold text-slate-900">${sys.status}</p>
-                        </div>
-                        <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100 min-w-[140px]">
-                            <p class="text-[9px] uppercase font-black text-blue-400 tracking-widest mb-1">Primary Performance Metric</p>
-                            <p class="text-sm font-bold text-blue-900">${sys.metrics}</p>
-                        </div>
+                        <div class="inline-block px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest mb-6 tracking-widest">Architectural Deep Dive</div>
+                        <h1 class="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white tracking-tight leading-tight">${sys.title}</h1>
                     </div>
                 </div>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-16">
                     <div class="lg:col-span-2 prose max-w-none">
                         <section>
-                            <h2>1. Problem Statement</h2>
-                            <p class="font-semibold text-slate-700">${sys.adr.problem}</p>
+                            <h2>1. The Problem</h2>
+                            <p class="font-bold text-zinc-700 dark:text-zinc-200">${sys.adr.problem}</p>
                         </section>
                         <section>
-                            <h2>2. Context & Requirements</h2>
+                            <h2>2. Engineering Context</h2>
                             <p>${sys.adr.context}</p>
                         </section>
                         <section>
-                            <h2>3. Proposed Decision</h2>
+                            <h2>3. The Decision</h2>
                             <p>${sys.adr.decision}</p>
                         </section>
                         <section>
                             <h2>4. Technical Implementation</h2>
-                            <p>${sys.adr.architecture}</p>
+                            ${sys.adr.architecture}
                         </section>
+                        ${sys.externalLinks ? `
+                        <section class="mt-12 pt-12 border-t border-zinc-100 dark:border-zinc-800">
+                            <h2>5. Knowledge Base & Reference</h2>
+                            <ul class="space-y-4">
+                                ${sys.externalLinks.map(link => `
+                                    <li class="flex items-center gap-3">
+                                        <i data-lucide="external-link" class="w-4 h-4 text-blue-500"></i>
+                                        <a href="${link.url}" target="_blank" class="text-blue-600 dark:text-blue-400 font-bold hover:underline transition-all">
+                                            ${link.name}
+                                        </a>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </section>
+                        ` : ''}
                     </div>
                     <div class="space-y-12">
-                        <div class="bg-slate-900 rounded-3xl p-8 text-white shadow-xl shadow-slate-200">
-                            <h4 class="text-blue-400 font-black uppercase tracking-widest text-[10px] mb-6">Blueprint Stack</h4>
+                        <div class="bg-blue-600 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/20">
+                            <h4 class="text-blue-100 font-black uppercase tracking-widest text-[10px] mb-6">Internal Stack</h4>
                             <ul class="space-y-4 font-mono text-xs">
-                                ${sys.stack.map(s => `<li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> ${s}</li>`).join('')}
+                                ${sys.stack.map(s => `<li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-white/80"></i> ${s}</li>`).join('')}
                             </ul>
                         </div>
-                        <div class="p-8 bg-slate-50 rounded-3xl border border-slate-100">
-                            <h4 class="text-slate-900 font-black uppercase tracking-widest text-[10px] mb-4">Trade-offs & Consequences</h4>
-                            <p class="text-slate-500 text-sm leading-relaxed italic border-l-4 border-amber-400 pl-4">${sys.adr.consequences}</p>
+                        <div class="p-8 bg-zinc-50 dark:bg-zinc-900 rounded-3xl border border-zinc-100 dark:border-zinc-800">
+                            <h4 class="text-zinc-900 dark:text-zinc-100 font-black uppercase tracking-widest text-[10px] mb-4">Final Verdict</h4>
+                            <p class="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed italic border-l-4 border-blue-600 dark:border-blue-500 pl-4">${sys.adr.consequences}</p>
                         </div>
                     </div>
                 </div>
@@ -338,23 +409,11 @@
             document.getElementById('detailView').classList.add('hidden');
             document.getElementById('catalogView').classList.remove('hidden');
             document.getElementById('catalogHero').classList.remove('hidden');
+            lucide.createIcons();
         }
-
-        function toggleMobileSearch() {
-            document.getElementById('mobileSearchOverlay').classList.toggle('hidden');
-        }
-
-        // Search Handlers
-        document.getElementById('systemSearch').addEventListener('input', (e) => {
-            currentSearch = e.target.value.toLowerCase();
-            renderSystems();
-        });
-        document.getElementById('mobileSearchInput').addEventListener('input', (e) => {
-            currentSearch = e.target.value.toLowerCase();
-            renderSystems();
-        });
 
         window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') === 'dark') toggleDarkMode();
             renderSystems();
         });
     </script>
