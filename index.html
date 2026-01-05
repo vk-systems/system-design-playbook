@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Basecase | Architecture GUIDE</title>
     
+    <!-- THEME CRITICAL: Executes before paint to prevent white flash -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+
     <!-- Scripts & Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -15,6 +23,14 @@
             darkMode: 'class',
             theme: {
                 extend: {
+                    colors: {
+                        zinc: {
+                            950: '#09090b', // Deep Industry Charcoal
+                            900: '#121214', // Card Surface
+                            800: '#1e1e20', // Elevated Surface
+                            700: '#27272a', // Borders
+                        }
+                    },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
@@ -25,86 +41,96 @@
     </script>
 
     <style>
+        /* Anti-flicker and smooth transition logic */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Apply smooth transition to all color properties when toggling */
+        html.theme-toggling,
+        html.theme-toggling body,
+        html.theme-toggling .system-card,
+        html.theme-toggling nav,
+        html.theme-toggling header,
+        html.theme-toggling footer,
+        html.theme-toggling div {
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        color 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .dark body { background-color: #09090b; }
         
         .glass {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .dark .glass {
-            background: rgba(10, 10, 10, 0.8);
+            background: rgba(18, 18, 20, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .system-card:hover .icon-box {
-            transform: scale(1.05) rotate(2deg);
-            background-color: #2563eb;
-            color: white;
+        /* Card hover states */
+        .system-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .system-card:hover {
+            transform: translateY(-4px);
         }
 
-        /* Prose styles for deep dark mode */
-        .prose h2 { font-weight: 800; font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; color: #0f172a; border-left: 4px solid #2563eb; padding-left: 1rem; }
-        .dark .prose h2 { color: #ffffff; border-left-color: #3b82f6; }
+        /* Prose styles for legibility */
+        .prose h2 { font-weight: 800; font-size: 1.5rem; margin-top: 2rem; margin-bottom: 1rem; color: #0f172a; border-left: 4px solid #3b82f6; padding-left: 1rem; }
+        .dark .prose h2 { color: #f4f4f5; border-left-color: #2563eb; }
         
-        .prose h3 { font-weight: 700; font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #1e293b; }
-        .dark .prose h3 { color: #f4f4f5; }
-
-        .prose p { margin-bottom: 1.25rem; line-height: 1.75; color: #475569; }
+        .prose p { margin-bottom: 1.25rem; line-height: 1.75; color: #3f3f46; }
         .dark .prose p { color: #a1a1aa; }
 
-        .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
-        .dark .prose ul { color: #a1a1aa; }
-
-        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.9em; }
-        .dark .prose code { background: #27272a; color: #60a5fa; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f4f4f5; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.9em; color: #2563eb; }
+        .dark .prose code { background: #1e1e20; color: #60a5fa; }
         
         .bit-box {
             display: flex;
-            background: #09090b;
+            background: #0f172a;
             color: #d4d4d8;
             font-family: 'JetBrains Mono', monospace;
             padding: 1.5rem;
             border-radius: 1rem;
             margin: 2rem 0;
             overflow-x: auto;
-            border: 1px solid #27272a;
+            border: 1px solid #1e293b;
         }
+        .dark .bit-box { background: #000000; border-color: #27272a; }
 
-        /* Blueprint SVG Styles */
-        .bp-node { transition: all 0.2s; cursor: pointer; }
-        .bp-node:hover rect { stroke: #2563eb; stroke-width: 3; filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.3)); }
-        .bp-node text { pointer-events: none; }
-        
         .inline-link {
             color: #2563eb;
             font-weight: 700;
             cursor: pointer;
-            border-bottom: 2px solid rgba(37, 99, 235, 0.2);
-            transition: all 0.2s;
+            text-decoration: underline;
+            text-decoration-color: rgba(37, 99, 235, 0.2);
+            text-underline-offset: 4px;
         }
-        .inline-link:hover {
-            background: rgba(37, 99, 235, 0.05);
-            border-bottom-color: #2563eb;
-        }
-        
-        /* Hero Pattern Background */
+        .dark .inline-link { color: #60a5fa; }
+
+        .comparison-table { width: 100%; border-collapse: collapse; margin: 2rem 0; }
+        .comparison-table th { text-align: left; padding: 1rem; border-bottom: 2px solid #e2e8f0; color: #71717a; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .comparison-table td { padding: 1rem; border-bottom: 1px solid #f4f4f5; font-size: 0.875rem; }
+        .dark .comparison-table th { border-bottom-color: #27272a; color: #a1a1aa; }
+        .dark .comparison-table td { border-bottom-color: #1e1e20; color: #d4d4d8; }
+
         .grid-pattern {
-            background-image: radial-gradient(rgba(37, 99, 235, 0.1) 1px, transparent 0);
+            background-image: radial-gradient(rgba(37, 99, 235, 0.08) 1px, transparent 0);
             background-size: 40px 40px;
         }
         .dark .grid-pattern {
-            background-image: radial-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 0);
+            background-image: radial-gradient(rgba(59, 130, 246, 0.04) 1px, transparent 0);
         }
     </style>
 </head>
-<body class="bg-zinc-50 dark:bg-black text-zinc-900 dark:text-zinc-100 font-sans antialiased transition-colors duration-500">
+<body class="bg-zinc-50 text-zinc-900 dark:text-zinc-100 font-sans antialiased transition-colors duration-200">
 
     <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md text-zinc-900 dark:text-white border-b border-zinc-200 dark:border-zinc-800">
+    <nav class="sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/90 backdrop-blur-md text-zinc-900 dark:text-white border-b border-zinc-200 dark:border-zinc-800/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center gap-3 cursor-pointer" onclick="showCatalog()">
@@ -118,19 +144,18 @@
                 </div>
                 
                 <div class="flex items-center gap-2 md:gap-4">
-                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-blue-600 transition-all" id="themeToggle">
-                        <i data-lucide="moon" class="w-5 h-5"></i>
+                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-blue-600 transition-all focus:outline-none" id="themeToggle">
+                        <i data-lucide="moon" class="w-5 h-5" id="themeIcon"></i>
                     </button>
-                    <a href="#" class="p-2 text-zinc-500 dark:text-zinc-400 hover:text-blue-600"><i data-lucide="github" class="w-6 h-6"></i></a>
+                    <a href="https://github.com" target="_blank" class="p-2 text-zinc-500 dark:text-zinc-400 hover:text-blue-600"><i data-lucide="github" class="w-6 h-6"></i></a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content Wrapper -->
     <div id="mainContent">
-        <header id="catalogHero" class="bg-white dark:bg-black border-b border-zinc-200 dark:border-zinc-800 pt-20 md:pt-32 pb-24 md:pb-36 px-4 overflow-hidden relative grid-pattern transition-colors duration-500">
-            <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[120px] opacity-60"></div>
+        <header id="catalogHero" class="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-900 pt-20 md:pt-32 pb-24 md:pb-36 px-4 overflow-hidden relative grid-pattern">
+            <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-blue-500/5 dark:bg-blue-600/5 rounded-full blur-[120px] opacity-60"></div>
             
             <div class="max-w-7xl mx-auto text-center lg:text-left relative z-10">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 mb-8">
@@ -138,22 +163,21 @@
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                     </span>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">Systems Lab v1.6</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">Systems Lab v1.9</span>
                 </div>
                 
                 <h1 class="text-6xl md:text-9xl font-black text-zinc-900 dark:text-white mb-10 tracking-tighter leading-[0.9]">Architect's <br/><span class="text-blue-600 dark:text-blue-500 italic">Decision Logs.</span></h1>
                 
                 <div class="max-w-3xl">
-                    <p class="text-zinc-600 dark:text-zinc-400 text-xl md:text-3xl mb-12 font-medium leading-tight tracking-tight text-balance">Deconstructing the engineering logic behind <span class="text-zinc-900 dark:text-zinc-100 font-bold underline decoration-blue-500/30 italic">high-scale primitives</span> and <span class="text-zinc-900 dark:text-zinc-100 font-bold underline decoration-blue-500/30 italic">distributed systems.</span></p>
-                    
-                    <div class="flex flex-wrap justify-center lg:justify-start gap-12 border-t border-zinc-100 dark:border-zinc-800 pt-10">
+                    <p class="text-zinc-600 dark:text-zinc-400 text-xl md:text-3xl mb-12 font-medium leading-tight text-balance">Engineering logic behind <span class="text-zinc-900 dark:text-zinc-100 font-bold underline decoration-blue-500/30 italic">high-scale primitives</span> and <span class="text-zinc-900 dark:text-zinc-100 font-bold underline decoration-blue-500/30 italic">distributed systems.</span></p>
+                    <div class="flex flex-wrap justify-center lg:justify-start gap-12 border-t border-zinc-100 dark:border-zinc-900 pt-10">
                         <div class="flex flex-col">
                             <span class="text-[10px] font-black uppercase text-zinc-400 dark:text-zinc-600 tracking-[0.2em] mb-2">Systems Perspective</span>
                             <span class="text-xs font-bold text-zinc-500 dark:text-zinc-400">Availability • Reliability • Performance</span>
                         </div>
                         <div class="flex flex-col">
                             <span class="text-[10px] font-black uppercase text-zinc-400 dark:text-zinc-600 tracking-[0.2em] mb-2">Core Domains</span>
-                            <span class="text-xs font-bold text-zinc-500 dark:text-zinc-400">Storage Engines • Consensus • Global Infrastructure</span>
+                            <span class="text-xs font-bold text-zinc-500 dark:text-zinc-400">Storage Engines • Consensus • Infrastructure</span>
                         </div>
                     </div>
                 </div>
@@ -167,15 +191,15 @@
         </div>
 
         <div id="detailView" class="hidden max-w-6xl mx-auto px-4 py-16">
-            <button onclick="showCatalog()" class="mb-12 flex items-center gap-3 text-zinc-500 dark:text-zinc-400 hover:text-blue-600 font-bold text-xs uppercase tracking-widest transition-colors group">
+            <button onclick="showCatalog()" class="mb-12 flex items-center gap-3 text-zinc-500 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 font-bold text-xs uppercase tracking-widest transition-colors group">
                 <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-2"></i> Back to Catalog
             </button>
-            <div id="detailContent" class="bg-white dark:bg-zinc-950 rounded-[3rem] border border-zinc-200 dark:border-zinc-800 p-8 md:p-20 shadow-2xl relative transition-colors duration-500">
+            <div id="detailContent" class="bg-white dark:bg-zinc-900 rounded-[3rem] border border-zinc-200 dark:border-zinc-800 p-8 md:p-20 shadow-2xl relative">
             </div>
         </div>
     </div>
 
-    <footer class="bg-zinc-50 dark:bg-black border-t border-zinc-200 dark:border-zinc-900 py-16 text-center transition-colors duration-500">
+    <footer class="bg-zinc-50 dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-900 py-16 text-center">
         <p class="text-[10px] text-zinc-400 dark:text-zinc-600 font-black uppercase tracking-[0.3em]">&copy; 2024 Basecase Architecture Lab</p>
     </footer>
 
@@ -191,23 +215,22 @@
                 metrics: "10M+ TPS",
                 status: "Live",
                 adr: {
-                    problem: "Generating billions of sortable 64-bit IDs without a central bottleneck or database lock.",
-                    context: "This system relies on three pillars: <span class='inline-link' onclick='showDetail(\"distributed-consensus\")'>Consensus</span> for node coordination, bit-masking for speed, and <span class='inline-link' onclick='showDetail(\"lsm-tree\")'>LSM-Trees</span> for sequence durability.",
-                    decision: "We implemented a Snowflake generator. Below is the interactive blueprint showing how these sub-systems interact.",
+                    problem: "How do we generate unique 64-bit IDs at scale? UUIDs are 128-bit and non-sortable, causing massive index fragmentation in databases.",
+                    context: "This system relies on <span class='inline-link' onclick='showDetail(\"distributed-consensus\")'>Consensus</span> for coordination and <span class='inline-link' onclick='showDetail(\"lsm-tree\")'>LSM-Trees</span> for durability.",
+                    decision: "Implement a structured Snowflake generator. Use the interactive blueprint below to explore the sub-components.",
                     architecture: `
-                        <div class="my-12 p-8 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-inner">
-                            <h4 class="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-8">Interactive Blueprint</h4>
+                        <div class="my-12 p-8 bg-zinc-50 dark:bg-zinc-950 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-inner overflow-hidden">
                             <svg viewBox="0 0 600 340" class="w-full h-auto drop-shadow-xl">
                                 <g class="bp-node" onclick="showDetail('global-sequencer')">
                                     <rect x="200" y="20" width="200" height="70" rx="12" class="fill-white dark:fill-zinc-800 stroke-zinc-200 dark:stroke-zinc-700" stroke-width="2"/>
                                     <text x="300" y="60" text-anchor="middle" class="font-black text-sm fill-zinc-900 dark:fill-white">Sequencer Node</text>
                                 </g>
-                                <path d="M300 90 V 160" class="stroke-zinc-300 dark:stroke-zinc-700" stroke-width="2" fill="none" stroke-dasharray="4"/>
-                                <path d="M300 160 H 100 V 220" class="stroke-zinc-300 dark:stroke-zinc-700" stroke-width="2" fill="none" stroke-dasharray="4"/>
-                                <path d="M300 160 H 500 V 220" class="stroke-zinc-300 dark:stroke-zinc-700" stroke-width="2" fill="none" stroke-dasharray="4"/>
+                                <path d="M300 90 V 160" class="stroke-zinc-300 dark:stroke-zinc-800" stroke-width="2" fill="none" stroke-dasharray="4"/>
+                                <path d="M300 160 H 100 V 220" class="stroke-zinc-300 dark:stroke-zinc-800" stroke-width="2" fill="none" stroke-dasharray="4"/>
+                                <path d="M300 160 H 500 V 220" class="stroke-zinc-300 dark:stroke-zinc-800" stroke-width="2" fill="none" stroke-dasharray="4"/>
                                 <g class="bp-node" onclick="showDetail('distributed-consensus')">
                                     <rect x="25" y="220" width="150" height="60" rx="12" class="fill-white dark:fill-zinc-800 stroke-zinc-200 dark:stroke-zinc-700" stroke-width="2"/>
-                                    <text x="100" y="255" text-anchor="middle" class="font-bold text-xs fill-blue-600 dark:fill-blue-400">Consensus (Etcd)</text>
+                                    <text x="100" y="255" text-anchor="middle" class="font-bold text-xs fill-blue-600 dark:fill-blue-400">Consensus</text>
                                 </g>
                                 <g class="bp-node" onclick="showDetail('bloom-filter')">
                                     <rect x="225" y="220" width="150" height="60" rx="12" class="fill-white dark:fill-zinc-800 stroke-zinc-200 dark:stroke-zinc-700" stroke-width="2"/>
@@ -215,19 +238,22 @@
                                 </g>
                                 <g class="bp-node" onclick="showDetail('lsm-tree')">
                                     <rect x="425" y="220" width="150" height="60" rx="12" class="fill-white dark:fill-zinc-800 stroke-zinc-200 dark:stroke-zinc-700" stroke-width="2"/>
-                                    <text x="500" y="255" text-anchor="middle" class="font-bold text-xs fill-blue-600 dark:fill-blue-400">LSM-Tree Storage</text>
+                                    <text x="500" y="255" text-anchor="middle" class="font-bold text-xs fill-blue-600 dark:fill-blue-400">LSM-Tree</text>
                                 </g>
                             </svg>
                         </div>
-                        <h3>Implementation Detail</h3>
-                        <p>When the <code>Sequencer Node</code> starts, it uses <span class="inline-link" onclick="showDetail('distributed-consensus')">Distributed Consensus</span> to claim a unique Machine ID. During operation, it checks a <span class="inline-link" onclick="showDetail('bloom-filter')">Bloom Filter</span> for ID existence before committing the sequence to an <span class="inline-link" onclick="showDetail('lsm-tree')">LSM-Tree</span> based WAL (Write Ahead Log).</p>
+                        <h3>The Showdown: Snowflake vs. UUID</h3>
+                        <table class="comparison-table">
+                            <thead><tr><th>Feature</th><th>UUID v4</th><th>Snowflake</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>Size</strong></td><td>128-bit</td><td>64-bit</td></tr>
+                                <tr><td><strong>Ordering</strong></td><td>Random</td><td>Time-Sortable</td></tr>
+                                <tr><td><strong>Storage</strong></td><td>String/Binary</td><td>Native BigInt</td></tr>
+                            </tbody>
+                        </table>
                     `,
-                    consequences: "Achieved zero-coordination ID generation."
-                },
-                externalLinks: [
-                    { name: "Twitter Engineering: Announcing Snowflake", url: "https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake.html" },
-                    { name: "Standard Snowflake Crate (Rust)", url: "https://crates.io/crates/snowflake" }
-                ]
+                    consequences: "Instant local ID generation without central bottlenecks."
+                }
             },
             {
                 id: "distributed-consensus",
@@ -239,16 +265,13 @@
                 metrics: "CP (Consistency)",
                 status: "Live",
                 adr: {
-                    problem: "Agreeing on a value in a cluster where nodes fail and network partitions occur.",
-                    context: "Consensus ensures that a majority of nodes agree on the state before it is committed.",
-                    decision: "We utilize the <strong>Raft Algorithm</strong> for its focus on understandability and formal safety guarantees.",
+                    problem: "How do nodes agree on values in a cluster where any node can fail at any time?",
+                    context: "Consensus ensures that a majority of nodes agree on the state before it is considered 'committed'.",
+                    decision: "Utilize the Raft algorithm for its formal safety guarantees and developer understandability.",
                     architecture: "Leaders manage the log and heartbeat followers. If a leader fails, a new term begins via randomized timeout election.",
                     consequences: "Guarantees strong consistency at the cost of majority network round-trip latency."
                 },
-                externalLinks: [
-                    { name: "The Raft Consensus Algorithm Official Site", url: "https://raft.github.io/" },
-                    { name: "In Search of an Understandable Consensus Algorithm (PDF)", url: "https://raft.github.io/raft.pdf" }
-                ]
+                externalLinks: [{ name: "The Raft Consensus Algorithm Official Site", url: "https://raft.github.io/" }]
             },
             {
                 id: "bloom-filter",
@@ -260,17 +283,13 @@
                 metrics: "O(k) Lookup",
                 status: "Live",
                 adr: {
-                    problem: "Determining if a key exists in an <span class='inline-link' onclick='showDetail(\"lsm-tree\")'>LSM-Tree</span> without scanning multiple files on disk.",
-                    context: "Disk I/O is expensive. A Bloom Filter lives in RAM and provides a probabilistic existence check.",
-                    decision: "Implement a tiered bitset to avoid checking cold storage for sequence collisions.",
+                    problem: "Checking if a key exists in an <span class='inline-link' onclick='showDetail(\"lsm-tree\")'>LSM-Tree</span> is expensive due to multiple disk seeks.",
+                    context: "Disk I/O is the primary bottleneck for reads in write-heavy storage engines.",
+                    decision: "Implement a Bloom Filter in RAM to provide a probabilistic existence check.",
                     architecture: "Uses k-independent hash functions to map values to a bitset of size m.",
-                    consequences: "Sub-millisecond membership testing."
+                    consequences: "Sub-millisecond membership testing with a manageable false-positive rate."
                 },
-                externalLinks: [
-                    { name: "Bloom Filters: A Classic Deep Dive", url: "https://en.wikipedia.org/wiki/Bloom_filter" },
-                    { name: "Cloudflare: When Bloom Filters don't bloom", url: "https://blog.cloudflare.com/when-bloom-filters-dont-bloom/" },
-                    { name: "Interactive Bloom Filter Visualizer", url: "https://llimllib.github.io/bloomfilter-tutorial/" }
-                ]
+                externalLinks: [{ name: "Cloudflare: When Bloom Filters don't bloom", url: "https://blog.cloudflare.com/when-bloom-filters-dont-bloom/" }]
             },
             {
                 id: "lsm-tree",
@@ -282,48 +301,49 @@
                 metrics: "Write-Heavy",
                 status: "Live",
                 adr: {
-                    problem: "Handling high volume of random writes which would fragment a B-Tree index.",
-                    context: "LSM-Trees convert random writes into sequential disk I/O, which is orders of magnitude faster on SSDs.",
-                    decision: "Updates are buffered in a Memtable and flushed as immutable SSTables.",
-                    architecture: "Multiple SSTable levels are merged via background compaction to reclaim space.",
+                    problem: "How do we handle high-volume random writes without fragmenting the database index?",
+                    context: "B-Trees require expensive random I/O for updates, which kills performance on high-throughput systems.",
+                    decision: "Adopt a Log-Structured Merge-Tree approach. Updates are buffered in a Memtable and flushed sequentially.",
+                    architecture: "Multiple levels of immutable SSTables are merged via background compaction to reclaim space.",
                     consequences: "Exceptional write throughput for sequence persistence."
                 },
-                externalLinks: [
-                    { name: "The Log-Structured Merge-Tree (Original Paper)", url: "https://www.cs.umb.edu/~poneil/lsmtree.pdf" },
-                    { name: "RocksDB: A Persistent Key-Value Store for Fast Storage", url: "http://rocksdb.org/" },
-                    { name: "Cassandra Architecture: Storage Engine Deep Dive", url: "https://cassandra.apache.org/doc/stable/cassandra/architecture/storage-engine.html" }
-                ]
+                externalLinks: [{ name: "Cassandra Architecture: Storage Engine", url: "https://cassandra.apache.org/doc/stable/cassandra/architecture/storage-engine.html" }]
             }
         ];
 
-        let isDarkMode = false;
-
         function toggleDarkMode() {
-            isDarkMode = !isDarkMode;
             const html = document.documentElement;
-            const themeToggle = document.getElementById('themeToggle');
-            if (isDarkMode) {
-                html.classList.add('dark');
-                themeToggle.innerHTML = '<i data-lucide="sun" class="w-5 h-5"></i>';
-            } else {
-                html.classList.remove('dark');
-                themeToggle.innerHTML = '<i data-lucide="moon" class="w-5 h-5"></i>';
-            }
-            lucide.createIcons();
-            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            const icon = document.getElementById('themeIcon');
+            
+            // Enable transitions just for the toggle duration
+            html.classList.add('theme-toggling');
+            const isDark = html.classList.toggle('dark');
+            
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            
+            // Update icon with a small timeout to let the class change settle
+            setTimeout(() => {
+                icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+                lucide.createIcons();
+            }, 50);
+
+            // Cleanup transition class after animation completes
+            setTimeout(() => {
+                html.classList.remove('theme-toggling');
+            }, 500);
         }
 
         function renderSystems() {
             const grid = document.getElementById('systemsGrid');
             grid.innerHTML = SYSTEMS.map(sys => `
-                <div class="system-card bg-white dark:bg-zinc-900/50 rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 p-8 flex flex-col h-full hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl dark:hover:bg-zinc-900 group">
-                    <div class="icon-box w-14 h-14 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center text-zinc-600 dark:text-zinc-400 mb-8 transition-all">
+                <div class="system-card bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200 dark:border-zinc-800 p-8 flex flex-col h-full hover:shadow-xl dark:hover:bg-zinc-800 transition-all duration-300 group">
+                    <div class="icon-box w-14 h-14 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center text-zinc-600 dark:text-zinc-400 mb-8">
                         <i data-lucide="${sys.icon}"></i>
                     </div>
                     <h3 class="text-2xl font-black text-zinc-900 dark:text-white mb-3 tracking-tight">${sys.title}</h3>
                     <p class="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mb-10 font-medium">${sys.description}</p>
                     <div class="mt-auto pt-6 border-t border-zinc-100 dark:border-zinc-800">
-                        <button onclick="showDetail('${sys.id}')" class="w-full bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 dark:hover:bg-blue-500 dark:hover:text-white transition-all shadow-lg active:scale-95">
+                        <button onclick="showDetail('${sys.id}')" class="w-full bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-950 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 dark:hover:bg-blue-500 dark:hover:text-white transition-all shadow-lg active:scale-95">
                             Read Design Logic
                         </button>
                     </div>
@@ -344,53 +364,24 @@
             content.innerHTML = `
                 <div class="flex flex-col md:flex-row justify-between items-start gap-8 mb-16 pb-12 border-b border-zinc-100 dark:border-zinc-800">
                     <div class="max-w-2xl">
-                        <div class="inline-block px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest mb-6 tracking-widest">Architectural Deep Dive</div>
+                        <div class="inline-block px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest mb-6">Architectural Deep Dive</div>
                         <h1 class="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white tracking-tight leading-tight">${sys.title}</h1>
                     </div>
                 </div>
-                
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-16">
                     <div class="lg:col-span-2 prose max-w-none">
-                        <section>
-                            <h2>1. The Problem</h2>
-                            <p class="font-bold text-zinc-700 dark:text-zinc-200">${sys.adr.problem}</p>
-                        </section>
-                        <section>
-                            <h2>2. Engineering Context</h2>
-                            <p>${sys.adr.context}</p>
-                        </section>
-                        <section>
-                            <h2>3. The Decision</h2>
-                            <p>${sys.adr.decision}</p>
-                        </section>
-                        <section>
-                            <h2>4. Technical Implementation</h2>
-                            ${sys.adr.architecture}
-                        </section>
-                        ${sys.externalLinks ? `
-                        <section class="mt-12 pt-12 border-t border-zinc-100 dark:border-zinc-800">
-                            <h2>5. Knowledge Base & Reference</h2>
-                            <ul class="space-y-4">
-                                ${sys.externalLinks.map(link => `
-                                    <li class="flex items-center gap-3">
-                                        <i data-lucide="external-link" class="w-4 h-4 text-blue-500"></i>
-                                        <a href="${link.url}" target="_blank" class="text-blue-600 dark:text-blue-400 font-bold hover:underline transition-all">
-                                            ${link.name}
-                                        </a>
-                                    </li>
-                                `).join('')}
-                            </ul>
-                        </section>
-                        ` : ''}
+                        <section><h2>1. The Problem</h2><p class="font-bold text-zinc-700 dark:text-zinc-200">${sys.adr.problem}</p></section>
+                        <section><h2>2. Context</h2><p>${sys.adr.context}</p></section>
+                        <section><h2>3. The Decision</h2><p>${sys.adr.decision}</p></section>
+                        <section><h2>4. Implementation</h2>${sys.adr.architecture}</section>
+                        ${sys.externalLinks ? `<section class="mt-12 pt-12 border-t border-zinc-100 dark:border-zinc-800"><h2>5. Knowledge Base</h2><ul class="space-y-4">${sys.externalLinks.map(link => `<li class="flex items-center gap-3"><i data-lucide="external-link" class="w-4 h-4 text-blue-500"></i><a href="${link.url}" target="_blank" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">${link.name}</a></li>`).join('')}</ul></section>` : ''}
                     </div>
                     <div class="space-y-12">
                         <div class="bg-blue-600 rounded-3xl p-8 text-white shadow-xl shadow-blue-500/20">
                             <h4 class="text-blue-100 font-black uppercase tracking-widest text-[10px] mb-6">Internal Stack</h4>
-                            <ul class="space-y-4 font-mono text-xs">
-                                ${sys.stack.map(s => `<li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-white/80"></i> ${s}</li>`).join('')}
-                            </ul>
+                            <ul class="space-y-4 font-mono text-xs">${sys.stack.map(s => `<li class="flex items-center gap-3"><i data-lucide="check" class="w-4 h-4 text-white/80"></i> ${s}</li>`).join('')}</ul>
                         </div>
-                        <div class="p-8 bg-zinc-50 dark:bg-zinc-900 rounded-3xl border border-zinc-100 dark:border-zinc-800">
+                        <div class="p-8 bg-zinc-50 dark:bg-zinc-950 rounded-3xl border border-zinc-200 dark:border-zinc-800">
                             <h4 class="text-zinc-900 dark:text-zinc-100 font-black uppercase tracking-widest text-[10px] mb-4">Final Verdict</h4>
                             <p class="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed italic border-l-4 border-blue-600 dark:border-blue-500 pl-4">${sys.adr.consequences}</p>
                         </div>
@@ -413,7 +404,8 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('theme') === 'dark') toggleDarkMode();
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
             renderSystems();
         });
     </script>
