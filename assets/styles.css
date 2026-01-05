@@ -1,0 +1,148 @@
+/* ARCHITECTURAL SHIFT: CSS Variable Surfaces 
+   This eliminates the "recalculation flicker" by updating only at the root.
+*/
+:root {
+    --bg-main: #f9fafb;
+    --bg-surface: #ffffff;
+    --text-primary: #09090b;
+    --text-secondary: #52525b;
+    --border-ui: #e4e4e7;
+    --brand-primary: #2563eb;
+    --grid-opacity: 0.08;
+}
+
+.dark {
+    --bg-main: #09090b;
+    --bg-surface: #121214;
+    --text-primary: #fafafa;
+    --text-secondary: #a1a1aa;
+    --border-ui: #27272a;
+    --brand-primary: #3b82f6;
+    --grid-opacity: 0.04;
+}
+
+/* View Transition API: The secret to GitHub-level smoothness */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Prevent flash by disabling transitions during theme switch */
+.theme-transitioning,
+.theme-transitioning * {
+    transition: none !important;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Surface Components */
+.card-surface {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-ui);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-surface:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* Hero & Patterns */
+.hero-grid {
+    background-image: radial-gradient(var(--brand-primary) 0.5px, transparent 0.5px);
+    background-size: 32px 32px;
+    opacity: var(--grid-opacity);
+}
+
+/* Typography Legibility */
+.prose h2 { 
+    font-weight: 800; 
+    font-size: 1.5rem; 
+    margin-top: 2rem; 
+    margin-bottom: 1rem; 
+    border-left: 4px solid var(--brand-primary); 
+    padding-left: 1rem; 
+    color: var(--text-primary); 
+}
+.prose p { 
+    margin-bottom: 1.25rem; 
+    line-height: 1.8; 
+    color: var(--text-secondary); 
+}
+.prose code { 
+    font-family: 'JetBrains Mono', monospace; 
+    background: var(--border-ui); 
+    padding: 0.2rem 0.4rem; 
+    border-radius: 0.3rem; 
+    font-size: 0.9em; 
+    color: var(--brand-primary); 
+}
+
+/* Icon Switcher */
+.theme-btn {
+    width: 40px;
+    height: 40px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.icon-layer {
+    position: absolute;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+}
+.sun-icon { opacity: 0; transform: rotate(-90deg) scale(0); }
+.moon-icon { opacity: 1; transform: rotate(0deg) scale(1); }
+.dark .sun-icon { opacity: 1; transform: rotate(0deg) scale(1); }
+.dark .moon-icon { opacity: 0; transform: rotate(90deg) scale(0); }
+
+/* Comparison Table */
+.ui-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin: 1.5rem 0; 
+}
+.ui-table th { 
+    text-align: left; 
+    padding: 0.75rem; 
+    border-bottom: 2px solid var(--border-ui); 
+    color: var(--text-secondary); 
+    font-size: 0.75rem; 
+    text-transform: uppercase; 
+    letter-spacing: 0.1em; 
+}
+.ui-table td { 
+    padding: 0.75rem; 
+    border-bottom: 1px solid var(--border-ui); 
+    font-size: 0.875rem; 
+}
+
+/* Blueprint Styles */
+.bp-node { cursor: pointer; }
+.bp-node rect { 
+    fill: var(--bg-surface); 
+    stroke: var(--border-ui); 
+    stroke-width: 2; 
+}
+.bp-node:hover rect { 
+    stroke: var(--brand-primary); 
+    stroke-width: 3; 
+}
+.bp-node text { 
+    fill: var(--text-primary); 
+    font-weight: 700; 
+    font-size: 12px; 
+}
+.bp-line { 
+    stroke: var(--border-ui); 
+    stroke-width: 2; 
+    stroke-dasharray: 4; 
+    fill: none; 
+}

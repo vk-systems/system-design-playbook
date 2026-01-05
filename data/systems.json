@@ -1,0 +1,80 @@
+[
+    {
+        "id": "global-sequencer",
+        "title": "Global Sequencer",
+        "category": "Distributed",
+        "icon": "cpu",
+        "description": "High-throughput unique ID generation using the Snowflake algorithm for chronological sorting.",
+        "stack": ["Snowflake-ID", "Rust", "gRPC"],
+        "adr": {
+            "problem": "Why not use UUIDs? While 128-bit UUIDs are globally unique, they introduce major bottlenecks at scale: index fragmentation and lack of sorting capability.",
+            "context": "This system relies on <span class='inline-link' onclick='showDetail(\"distributed-consensus\")'>Consensus</span> and <span class='inline-link' onclick='showDetail(\"lsm-tree\")'>LSM-Trees</span>.",
+            "decision": "Implement a structured Snowflake generator. Explore the sub-components in the blueprint below.",
+            "architecture": "<div class=\"my-10 p-10 rounded-2xl border bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-inner overflow-hidden\"><svg viewBox=\"0 0 600 340\" class=\"w-full h-auto\"><g class=\"bp-node\" onclick=\"showDetail('global-sequencer')\"><rect x=\"200\" y=\"20\" width=\"200\" height=\"70\" rx=\"12\" /><text x=\"300\" y=\"60\" text-anchor=\"middle\">Sequencer Node</text></g><path d=\"M300 90 V 160\" class=\"bp-line\" /><path d=\"M300 160 H 100 V 220\" class=\"bp-line\" /><path d=\"M300 160 H 500 V 220\" class=\"bp-line\" /><g class=\"bp-node\" onclick=\"showDetail('distributed-consensus')\"><rect x=\"25\" y=\"220\" width=\"150\" height=\"60\" rx=\"12\" /><text x=\"100\" y=\"255\" text-anchor=\"middle\">Consensus</text></g><g class=\"bp-node\" onclick=\"showDetail('bloom-filter')\"><rect x=\"225\" y=\"220\" width=\"150\" height=\"60\" rx=\"12\" /><text x=\"300\" y=\"255\" text-anchor=\"middle\">Bloom Filter</text></g><g class=\"bp-node\" onclick=\"showDetail('lsm-tree')\"><rect x=\"425\" y=\"220\" width=\"150\" height=\"60\" rx=\"12\" /><text x=\"500\" y=\"255\" text-anchor=\"middle\">LSM-Tree</text></g></svg></div><h3>Snowflake vs. UUID Showdown</h3><table class=\"ui-table\"><thead><tr><th>Feature</th><th>UUID v4</th><th>Snowflake</th></tr></thead><tbody><tr><td><strong>Bit Size</strong></td><td>128-bit</td><td>64-bit</td></tr><tr><td><strong>Ordering</strong></td><td>Random</td><td>Time-Sortable</td></tr><tr><td><strong>Storage</strong></td><td>Binary/String</td><td>Native BigInt</td></tr></tbody></table>",
+            "consequences": "Instant local ID generation without central bottlenecks."
+        }
+    },
+    {
+        "id": "distributed-consensus",
+        "title": "Distributed Consensus",
+        "category": "Consistency",
+        "icon": "users",
+        "description": "Ensuring state machine consistency across distributed nodes via the Raft algorithm.",
+        "stack": ["Raft", "Quorum"],
+        "adr": {
+            "problem": "How do nodes agree on values in a cluster where any node can fail at any time?",
+            "context": "Consensus ensures that a majority of nodes agree on the state before it is considered 'committed'.",
+            "decision": "Utilize the Raft algorithm for its formal safety guarantees and developer understandability.",
+            "architecture": "Leaders manage the log and heartbeat followers. If a leader fails, a new term begins.",
+            "consequences": "Guarantees strong consistency at the cost of majority network latency."
+        },
+        "externalLinks": [
+            {
+                "name": "The Raft Consensus Algorithm Official Site",
+                "url": "https://raft.github.io/"
+            }
+        ]
+    },
+    {
+        "id": "bloom-filter",
+        "title": "Bloom Filter",
+        "category": "Storage",
+        "icon": "filter",
+        "description": "Probabilistic set membership to avoid unnecessary expensive disk seeks in LSM storage.",
+        "stack": ["Hashing", "Bitset"],
+        "adr": {
+            "problem": "Checking if a key exists in an <span class='inline-link' onclick='showDetail(\"lsm-tree\")'>LSM-Tree</span> is expensive due to multiple disk seeks.",
+            "context": "Disk I/O is the primary bottleneck for reads in write-heavy storage engines.",
+            "decision": "Implement a Bloom Filter in RAM to provide a probabilistic existence check.",
+            "architecture": "Uses k-independent hash functions to map values to a bitset of size m.",
+            "consequences": "Sub-millisecond membership testing with extremely low memory footprint."
+        },
+        "externalLinks": [
+            {
+                "name": "Cloudflare: When Bloom Filters don't bloom",
+                "url": "https://blog.cloudflare.com/when-bloom-filters-dont-bloom/"
+            }
+        ]
+    },
+    {
+        "id": "lsm-tree",
+        "title": "LSM-Tree Storage",
+        "category": "Persistence",
+        "icon": "database",
+        "description": "Write-optimized storage engine designed for high-throughput sequential inserts.",
+        "stack": ["Memtable", "SSTables"],
+        "adr": {
+            "problem": "How do we handle high-volume random writes without fragmenting the database index?",
+            "context": "B-Trees require expensive random I/O for updates, which kills performance.",
+            "decision": "Adopt a Log-Structured Merge-Tree approach. Updates are buffered in memory and flushed sequentially.",
+            "architecture": "Multiple levels of immutable SSTables are merged via background compaction.",
+            "consequences": "Exceptional write throughput for sequence persistence on modern SSDs."
+        },
+        "externalLinks": [
+            {
+                "name": "Cassandra Architecture: Storage Engine",
+                "url": "https://cassandra.apache.org/doc/stable/cassandra/architecture/storage-engine.html"
+            }
+        ]
+    }
+]
