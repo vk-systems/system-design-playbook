@@ -123,5 +123,187 @@
             }
         ],
         "relatedConcepts": ["bloom-filter", "global-sequencer"]
+    },
+    {
+        "id": "database-choice",
+        "title": "Database Selection",
+        "category": "Database",
+        "icon": "database",
+        "description": "PostgreSQL vs MySQL vs NoSQL: Choosing the right database for your workload patterns.",
+        "tags": ["database", "postgres", "mysql", "nosql", "decision-framework"],
+        "difficulty": "intermediate",
+        "estimatedReadTime": "20 min",
+        "stack": ["PostgreSQL", "MySQL", "MongoDB", "DynamoDB"],
+        "metadata": {
+            "dateAdded": "2026-01-14",
+            "source": "Production Experience",
+            "prerequisites": [],
+            "adrNumber": "ADR-002",
+            "status": "Coming Soon"
+        },
+        "adr": {
+            "problem": "Select database technology for a multi-tenant SaaS platform handling 100K+ organizations with varying data models and query patterns.",
+            "context": "Need to support ACID transactions, complex joins, flexible schema, and horizontal scaling. Budget: $20K/month infrastructure.",
+            "decision": "Coming Soon - Full ADR with production numbers and cost analysis",
+            "alternatives": "PostgreSQL, MySQL, MongoDB, DynamoDB, CockroachDB",
+            "consequences": "ADR in progress"
+        },
+        "relatedConcepts": ["lsm-tree", "distributed-consensus"]
+    },
+    {
+        "id": "caching-strategy",
+        "title": "Caching Strategy",
+        "category": "Performance",
+        "icon": "zap",
+        "description": "Redis vs Memcached vs CDN: Multi-layer caching for 99th percentile latency.",
+        "tags": ["caching", "redis", "cdn", "performance", "latency"],
+        "difficulty": "intermediate",
+        "estimatedReadTime": "18 min",
+        "stack": ["Redis", "CloudFront", "Varnish"],
+        "metadata": {
+            "dateAdded": "2026-01-14",
+            "source": "Production Experience",
+            "prerequisites": [],
+            "adrNumber": "ADR-003",
+            "status": "Coming Soon"
+        },
+        "adr": {
+            "problem": "Reduce API latency from 450ms P99 to <100ms P99 while handling 50K requests/second with 85% cache hit rate.",
+            "context": "User-facing API serving personalized content. Must balance freshness vs latency vs cost.",
+            "decision": "Coming Soon - Full ADR with cache invalidation strategies and cost breakdown",
+            "alternatives": "Redis Cluster, Memcached, Application cache, CDN edge caching",
+            "consequences": "ADR in progress"
+        },
+        "relatedConcepts": ["bloom-filter"]
+    },
+    {
+        "id": "api-gateway",
+        "title": "API Gateway Pattern",
+        "category": "API",
+        "icon": "network",
+        "description": "Kong vs NGINX vs AWS API Gateway: Centralized routing, rate limiting, and auth.",
+        "tags": ["api", "gateway", "microservices", "rate-limiting", "auth"],
+        "difficulty": "intermediate",
+        "estimatedReadTime": "16 min",
+        "stack": ["Kong", "NGINX", "AWS API Gateway"],
+        "metadata": {
+            "dateAdded": "2026-01-14",
+            "source": "Production Experience",
+            "prerequisites": [],
+            "adrNumber": "ADR-004",
+            "status": "Coming Soon"
+        },
+        "adr": {
+            "problem": "Manage 200+ microservices with unified authentication, rate limiting, and observability across 3 regions.",
+            "context": "Each service implementing its own auth/rate limiting leads to inconsistency and security gaps.",
+            "decision": "Coming Soon - Full ADR with performance benchmarks and cost analysis",
+            "alternatives": "Kong, NGINX + Lua, AWS API Gateway, Envoy, Traefik",
+            "consequences": "ADR in progress"
+        },
+        "relatedConcepts": ["distributed-consensus"]
+    },
+    {
+        "id": "message-queue",
+        "title": "Message Queue Selection",
+        "category": "Distributed",
+        "icon": "mail",
+        "description": "Kafka vs RabbitMQ vs SQS: Async processing and event-driven architecture at scale.",
+        "tags": ["messaging", "kafka", "rabbitmq", "sqs", "async"],
+        "difficulty": "advanced",
+        "estimatedReadTime": "22 min",
+        "stack": ["Kafka", "RabbitMQ", "AWS SQS"],
+        "metadata": {
+            "dateAdded": "2026-01-14",
+            "source": "Production Experience",
+            "prerequisites": [],
+            "adrNumber": "ADR-005",
+            "status": "Coming Soon"
+        },
+        "adr": {
+            "problem": "Process 5M events/day with guaranteed delivery, ordering, and replay capabilities for analytics and billing.",
+            "context": "Need durability, partition tolerance, and ability to reprocess historical events.",
+            "decision": "Coming Soon - Full ADR with throughput benchmarks and operational complexity",
+            "alternatives": "Kafka, RabbitMQ, AWS SQS/SNS, Redis Streams, NATS",
+            "consequences": "ADR in progress"
+        },
+        "relatedConcepts": ["global-sequencer", "distributed-consensus"]
+    },
+    {
+        "id": "search-engine",
+        "title": "Search & Indexing",
+        "category": "Search",
+        "icon": "search",
+        "description": "Elasticsearch vs Algolia vs Typesense: Full-text search with sub-50ms latency.",
+        "tags": ["search", "elasticsearch", "algolia", "full-text", "indexing"],
+        "difficulty": "intermediate",
+        "estimatedReadTime": "17 min",
+        "stack": ["Elasticsearch", "Algolia", "Typesense"],
+        "metadata": {
+            "dateAdded": "2026-01-14",
+            "source": "Production Experience",
+            "prerequisites": [],
+            "adrNumber": "ADR-006",
+            "status": "Coming Soon"
+        },
+        "adr": {
+            "problem": "Enable typo-tolerant full-text search across 10M documents with faceted filtering and <50ms P95 latency.",
+            "context": "User search is primary product discovery method. Poor search = lost revenue.",
+            "decision": "Coming Soon - Full ADR with relevance tuning and cost comparison",
+            "alternatives": "Elasticsearch, Algolia, Typesense, Meilisearch, PostgreSQL full-text",
+            "consequences": "ADR in progress"
+        },
+        "relatedConcepts": ["bloom-filter", "lsm-tree"]
+    },
+    {
+        "id": "observability",
+        "title": "Observability Stack",
+        "category": "Operations",
+        "icon": "activity",
+        "description": "Metrics, logs, and traces: Building production observability with Prometheus + Grafana.",
+        "tags": ["observability", "monitoring", "prometheus", "grafana", "logging"],
+        "difficulty": "intermediate",
+        "estimatedReadTime": "19 min",
+        "stack": ["Prometheus", "Grafana", "Loki", "Jaeger"],
+        "metadata": {
+            "dateAdded": "2026-01-14",
+            "source": "Production Experience",
+            "prerequisites": [],
+            "adrNumber": "ADR-007",
+            "status": "Coming Soon"
+        },
+        "adr": {
+            "problem": "Debug production incidents in <5 minutes with 30-day metric retention and distributed tracing across 200+ services.",
+            "context": "Mean time to resolution (MTTR) currently 2 hours due to poor visibility.",
+            "decision": "Coming Soon - Full ADR with retention strategy and alert fatigue solutions",
+            "alternatives": "Prometheus + Grafana, Datadog, New Relic, ELK Stack, Honeycomb",
+            "consequences": "ADR in progress"
+        },
+        "relatedConcepts": ["api-gateway"]
+    },
+    {
+        "id": "auth-system",
+        "title": "Authentication & Authorization",
+        "category": "Security",
+        "icon": "shield",
+        "description": "OAuth2 + JWT: Secure authentication for multi-tenant SaaS with SSO and RBAC.",
+        "tags": ["auth", "security", "oauth2", "jwt", "rbac"],
+        "difficulty": "advanced",
+        "estimatedReadTime": "21 min",
+        "stack": ["OAuth2", "JWT", "Auth0", "Keycloak"],
+        "metadata": {
+            "dateAdded": "2026-01-14",
+            "source": "Production Experience",
+            "prerequisites": [],
+            "adrNumber": "ADR-008",
+            "status": "Coming Soon"
+        },
+        "adr": {
+            "problem": "Support enterprise SSO (SAML, OIDC) with fine-grained RBAC for 100K+ users across 5K organizations.",
+            "context": "Security compliance requirements (SOC2, GDPR) + enterprise customer demands.",
+            "decision": "Coming Soon - Full ADR with session management and token rotation strategy",
+            "alternatives": "Auth0, Keycloak, AWS Cognito, Roll-your-own OAuth2",
+            "consequences": "ADR in progress"
+        },
+        "relatedConcepts": ["api-gateway"]
     }
 ]

@@ -755,7 +755,19 @@ function showDetail(id) {
         : [];
 
     content.innerHTML = `
+        <!-- Breadcrumbs -->
+        <div class="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 mb-6\">
+            <button onclick="showCatalog()" class="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">Home</button>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            <span class="text-zinc-700 dark:text-zinc-300">${sys.category}</span>
+            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+            <span class="text-zinc-900 dark:text-zinc-100 font-semibold">${sys.title}</span>
+        </div>
+        
         <div class="mb-16">
+            <button onclick="showCatalog()" class="group flex items-center gap-2 text-sm font-semibold mb-8 text-zinc-600 hover:text-cyan-600 dark:text-zinc-400 dark:hover:text-cyan-400 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Catalog
+            </button>
             <div class="flex items-start justify-between gap-4 mb-6">
                 <div class="inline-flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-cyan-600"></span>
@@ -1487,6 +1499,19 @@ function updateRoadmapProgress() {
 }
 
 /**
+ * Filter by status (production, coming soon)
+ */
+function filterByStatus(status) {
+    const filtered = SYSTEMS.filter(sys => {
+        if (status === 'production') {
+            return sys.metadata?.status === 'Production';
+        }
+        return true;
+    });
+    renderSystemGrid(filtered);
+}
+
+/**
  * Update hero section stats
  */
 function updateHeroStats() {
@@ -1494,6 +1519,29 @@ function updateHeroStats() {
     if (countEl) {
         countEl.textContent = SYSTEMS.length;
     }
+    
+    // Update catalog stats cards
+    const totalPatterns = SYSTEMS.length;
+    const productionADRs = SYSTEMS.filter(s => s.metadata?.status === 'Production').length;
+    const comingSoon = SYSTEMS.filter(s => s.metadata?.status === 'Coming Soon').length;
+    const categories = [...new Set(SYSTEMS.map(s => s.category))].length;
+    
+    const statTotal = document.getElementById('statTotalPatterns');
+    const statADRs = document.getElementById('statTotalADRs');
+    const statCategories = document.getElementById('statCategories');
+    
+    if (statTotal) {
+        statTotal.textContent = totalPatterns;
+        const subtitle = statTotal.nextElementSibling;
+        if (subtitle) subtitle.textContent = `${productionADRs} Production Ready`;
+    }
+    if (statADRs) {
+        statADRs.textContent = productionADRs;
+        const subtitle = statADRs.nextElementSibling;
+        if (subtitle) subtitle.textContent = `${comingSoon} Coming Soon`;
+    }
+    if (statCategories) statCategories.textContent = categories;
+    
     updateRoadmapProgress(); // Also update progress on init
 }
 

@@ -227,8 +227,8 @@
                             <!-- Glow effect -->
                             <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-2xl opacity-20 blur-xl"></div>
                             
-                            <!-- ADR Card -->
-                            <div class="relative bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
+                            <!-- ADR Card - Clickable -->
+                            <div onclick="showDetail('global-sequencer')" class="relative bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] hover:shadow-cyan-500/20">
                                 <!-- Card Header -->
                                 <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50">
                                     <div class="flex items-center justify-between">
@@ -246,17 +246,17 @@
                                     <div class="space-y-3">
                                         <div>
                                             <span class="text-cyan-600 dark:text-cyan-400">#</span>
-                                            <span class="text-zinc-900 dark:text-white font-bold"> ADR 001: Event Streaming Platform</span>
+                                            <span class="text-zinc-900 dark:text-white font-bold"> ADR 001: Distributed ID Generation</span>
                                         </div>
                                         
                                         <div class="text-zinc-600 dark:text-zinc-400">
                                             <span class="text-cyan-600 dark:text-cyan-400">##</span> Context
                                         </div>
                                         <div class="text-zinc-700 dark:text-zinc-300 pl-4">
-                                            <span class="text-zinc-500">We need to process </span>
-                                            <span class="text-teal-600 dark:text-teal-400 font-semibold">10M+ events/day</span>
-                                            <span class="text-zinc-500"> with</span><br/>
-                                            <span class="text-zinc-500">guaranteed ordering and replay capability.</span>
+                                            <span class="text-zinc-500">Generate unique IDs at </span>
+                                            <span class="text-teal-600 dark:text-teal-400 font-semibold">10M+ TPS</span>
+                                            <span class="text-zinc-500"> across</span><br/>
+                                            <span class="text-zinc-500">multiple data centers with 99.99% uptime.</span>
                                         </div>
                                         
                                         <div class="text-zinc-600 dark:text-zinc-400 pt-2">
@@ -264,25 +264,27 @@
                                         </div>
                                         <div class="text-zinc-700 dark:text-zinc-300 pl-4">
                                             <span class="text-zinc-500">Use </span>
-                                            <span class="px-2 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950 text-cyan-700 dark:text-cyan-300 font-semibold">Apache Kafka</span>
-                                            <span class="text-zinc-500"> over RabbitMQ</span>
+                                            <span class="px-2 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950 text-cyan-700 dark:text-cyan-300 font-semibold">Twitter Snowflake</span>
+                                            <span class="text-zinc-500"> algorithm</span>
                                         </div>
                                         
                                         <div class="text-zinc-600 dark:text-zinc-400 pt-2">
-                                            <span class="text-cyan-600 dark:text-cyan-400">##</span> Rationale
+                                            <span class="text-cyan-600 dark:text-cyan-400">##</span> Results
                                         </div>
                                         <div class="text-zinc-700 dark:text-zinc-300 pl-4 space-y-1">
-                                            <div><span class="text-teal-600 dark:text-teal-400">✓</span> Partition-level ordering guarantee</div>
-                                            <div><span class="text-teal-600 dark:text-teal-400">✓</span> Persistent log for event replay</div>
-                                            <div><span class="text-teal-600 dark:text-teal-400">✓</span> Horizontal scalability to 100+ nodes</div>
+                                            <div><span class="text-teal-600 dark:text-teal-400">✓</span> 12.5M IDs/sec throughput</div>
+                                            <div><span class="text-teal-600 dark:text-teal-400">✓</span> 0.8ms P99 latency</div>
+                                            <div><span class="text-teal-600 dark:text-teal-400">✓</span> $444K/year cost savings</div>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <!-- Card Footer -->
-                                <div class="px-6 py-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 flex items-center justify-between">
-                                    <span class="text-xs text-zinc-500">Pattern: Event Sourcing</span>
-                                    <span class="text-xs text-cyan-600 dark:text-cyan-400 font-semibold">View Full ADR →</span>
+                                <div class="px-6 py-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950/50 flex items-center justify-between group-hover:bg-cyan-50 dark:group-hover:bg-cyan-950/20 transition-colors">
+                                    <span class="text-xs text-zinc-500">Production • Global Sequencer</span>
+                                    <span class="text-xs text-cyan-600 dark:text-cyan-400 font-semibold flex items-center gap-1">
+                                        View Full ADR <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -294,26 +296,62 @@
         <!-- Catalog Index -->
         <div id="catalogView">
             <main class="max-w-7xl mx-auto px-6 py-12">
-                <!-- Filters & Stats -->
+                <!-- Stats Hero Section -->
+                <div class="mb-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="p-6 rounded-2xl bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20 border border-cyan-200 dark:border-cyan-800">
+                        <div class="text-sm text-cyan-600 dark:text-cyan-400 mb-1 font-medium">Total Patterns</div>
+                        <div class="text-3xl font-black text-cyan-900 dark:text-cyan-100" id="statTotalPatterns">12</div>
+                        <div class="text-xs text-cyan-600 dark:text-cyan-400 mt-1">1 Production Ready</div>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border border-green-200 dark:border-green-800">
+                        <div class="text-sm text-green-600 dark:text-green-400 mb-1 font-medium">ADRs Published</div>
+                        <div class="text-3xl font-black text-green-900 dark:text-green-100" id="statTotalADRs">1</div>
+                        <div class="text-xs text-green-600 dark:text-green-400 mt-1">7 Coming Soon</div>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 border border-purple-200 dark:border-purple-800">
+                        <div class="text-sm text-purple-600 dark:text-purple-400 mb-1 font-medium">Cost Savings</div>
+                        <div class="text-3xl font-black text-purple-900 dark:text-purple-100">$444K</div>
+                        <div class="text-xs text-purple-600 dark:text-purple-400 mt-1">Documented Yearly</div>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-200 dark:border-amber-800">
+                        <div class="text-sm text-amber-600 dark:text-amber-400 mb-1 font-medium">Categories</div>
+                        <div class="text-3xl font-black text-amber-900 dark:text-amber-100" id="statCategories">8</div>
+                        <div class="text-xs text-amber-600 dark:text-amber-400 mt-1">Across Tech Stack</div>
+                    </div>
+                </div>
+                
+                <!-- Filters & Search -->
                 <div class="mb-8 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                    <div class="flex items-center gap-4 flex-wrap">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <button onclick="filterByCategory('all')" class="filter-btn active" data-filter="all">
-                            All <span class="count" id="count-all">4</span>
+                            All <span class="count" id="count-all">12</span>
                         </button>
                         <button onclick="filterByCategory('Distributed')" class="filter-btn" data-filter="Distributed">
-                            Distributed <span class="count" id="count-Distributed">1</span>
+                            Distributed <span class="count" id="count-Distributed">2</span>
                         </button>
-                        <button onclick="filterByCategory('Storage')" class="filter-btn" data-filter="Storage">
-                            Storage <span class="count" id="count-Storage">1</span>
+                        <button onclick="filterByCategory('Database')" class="filter-btn" data-filter="Database">
+                            Database <span class="count" id="count-Database">1</span>
                         </button>
-                        <button onclick="filterByCategory('Consistency')" class="filter-btn" data-filter="Consistency">
-                            Consistency <span class="count" id="count-Consistency">1</span>
+                        <button onclick="filterByCategory('Performance')" class="filter-btn" data-filter="Performance">
+                            Performance <span class="count" id="count-Performance">1</span>
                         </button>
-                        <button onclick="filterByCategory('Persistence')" class="filter-btn" data-filter="Persistence">
-                            Persistence <span class="count" id="count-Persistence">1</span>
+                        <button onclick="filterByCategory('API')" class="filter-btn" data-filter="API">
+                            API <span class="count" id="count-API">1</span>
+                        </button>
+                        <button onclick="filterByCategory('Search')" class="filter-btn" data-filter="Search">
+                            Search <span class="count" id="count-Search">1</span>
+                        </button>
+                        <button onclick="filterByCategory('Operations')" class="filter-btn" data-filter="Operations">
+                            Operations <span class="count" id="count-Operations">1</span>
+                        </button>
+                        <button onclick="filterByCategory('Security')" class="filter-btn" data-filter="Security">
+                            Security <span class="count" id="count-Security">1</span>
                         </button>
                     </div>
                     <div class="flex items-center gap-2">
+                        <button onclick="filterByStatus('production')" class="px-3 py-1.5 text-sm rounded-lg hover:bg-green-100 dark:hover:bg-green-950/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800" title="Production Only">
+                            <i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i> Production
+                        </button>
                         <button onclick="toggleFavoritesOnly()" class="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800" id="favoritesBtn" title="Show favorites only">
                             <i data-lucide="star" class="w-5 h-5"></i>
                         </button>
@@ -391,6 +429,6 @@
     </footer>
 
     <!-- Application Logic -->
-    <script src="./assets/app.js?v=17"></script>
+    <script src="./assets/app.js?v=19"></script>
 </body>
 </html>
