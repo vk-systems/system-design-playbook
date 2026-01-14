@@ -12,24 +12,35 @@ let SYSTEMS = [
         "title": "Global Sequencer",
         "category": "Distributed",
         "icon": "cpu",
-        "description": "High-throughput unique ID generation using the Snowflake algorithm for chronological sorting.",
-        "tags": ["distributed-systems", "scalability", "database", "unique-ids"],
+        "description": "High-throughput unique ID generation at 12.5M IDs/second with Twitter's Snowflake algorithm.",
+        "tags": ["distributed-systems", "scalability", "database", "unique-ids", "snowflake"],
         "difficulty": "intermediate",
-        "estimatedReadTime": "8 min",
-        "stack": ["Snowflake-ID", "Rust", "gRPC"],
+        "estimatedReadTime": "15 min",
+        "stack": ["Snowflake", "ZooKeeper", "RocksDB", "gRPC"],
         "metadata": {
-            "dateAdded": "2026-01-05",
-            "source": "Twitter's Snowflake Paper",
-            "prerequisites": ["distributed-consensus", "lsm-tree"]
+            "dateAdded": "2026-01-14",
+            "source": "Twitter's Snowflake + Production Experience",
+            "prerequisites": [],
+            "adrNumber": "ADR-001",
+            "status": "Production",
+            "cost": "$8K/month",
+            "throughput": "12.5M TPS"
+        },
+        "stats": {
+            "throughput": "12.5M IDs/sec",
+            "latency": "0.8ms P99",
+            "cost": "$8K/month",
+            "savings": "$37K/month vs managed"
         },
         "adr": {
-            "problem": "Why not use UUIDs? While 128-bit UUIDs are globally unique, they introduce major bottlenecks at scale: index fragmentation and lack of sorting capability.",
-            "context": "This system relies on <span class='inline-link' onclick='showDetail(\"distributed-consensus\")'>Consensus</span> and <span class='inline-link' onclick='showDetail(\"lsm-tree\")'>LSM-Trees</span>.",
-            "decision": "Implement a structured Snowflake generator. Explore the sub-components in the blueprint below.",
-            "architecture": "<div class=\"my-10 p-10 rounded-2xl border bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-inner overflow-hidden\"><svg viewBox=\"0 0 600 340\" class=\"w-full h-auto\"><g class=\"bp-node\" onclick=\"showDetail('global-sequencer')\"><rect x=\"200\" y=\"20\" width=\"200\" height=\"70\" rx=\"12\" /><text x=\"300\" y=\"60\" text-anchor=\"middle\">Sequencer Node</text></g><path d=\"M300 90 V 160\" class=\"bp-line\" /><path d=\"M300 160 H 100 V 220\" class=\"bp-line\" /><path d=\"M300 160 H 500 V 220\" class=\"bp-line\" /><g class=\"bp-node\" onclick=\"showDetail('distributed-consensus')\"><rect x=\"25\" y=\"220\" width=\"150\" height=\"60\" rx=\"12\" /><text x=\"100\" y=\"255\" text-anchor=\"middle\">Consensus</text></g><g class=\"bp-node\" onclick=\"showDetail('bloom-filter')\"><rect x=\"225\" y=\"220\" width=\"150\" height=\"60\" rx=\"12\" /><text x=\"300\" y=\"255\" text-anchor=\"middle\">Bloom Filter</text></g><g class=\"bp-node\" onclick=\"showDetail('lsm-tree')\"><rect x=\"425\" y=\"220\" width=\"150\" height=\"60\" rx=\"12\" /><text x=\"500\" y=\"255\" text-anchor=\"middle\">LSM-Tree</text></g></svg></div><h3>Snowflake vs. UUID Showdown</h3><table class=\"ui-table\"><thead><tr><th>Feature</th><th>UUID v4</th><th>Snowflake</th></tr></thead><tbody><tr><td><strong>Bit Size</strong></td><td>128-bit</td><td>64-bit</td></tr><tr><td><strong>Ordering</strong></td><td>Random</td><td>Time-Sortable</td></tr><tr><td><strong>Storage</strong></td><td>Binary/String</td><td>Native BigInt</td></tr></tbody></table>",
-            "consequences": "Instant local ID generation without central bottlenecks."
+            "problem": "Generate globally unique, time-ordered 64-bit IDs at 10M+ TPS across multiple regions with sub-millisecond latency and high availability.",
+            "context": "Distributed transaction system handling 864 billion transactions/day across 50+ microservices. Must survive datacenter failures while maintaining uniqueness guarantees.",
+            "decision": "Twitter's Snowflake Algorithm with ZooKeeper coordination, RocksDB audit log, and gRPC transport. 9 sequencer nodes (3 per region) generating IDs locally without central coordination.",
+            "alternatives": "UUIDv4 (2× storage cost), Database Auto-Increment (28K TPS max), Centralized ID Service (adds network latency), MongoDB ObjectID (not time-sortable)",
+            "consequences": "✅ Achieved 12.5M TPS with 0.8ms P99 latency. ✅ Saves $444K/year vs managed service. ❌ Clock dependency risk (2 incidents in 6 months). ❌ ZooKeeper dependency for machine ID assignment.",
+            "filePath": "./Systems/global-sequencer/ADR-001-Distributed-ID-Generation.md"
         },
-        "relatedConcepts": ["distributed-consensus", "lsm-tree", "bloom-filter"]
+        "relatedConcepts": ["distributed-consensus", "lsm-tree", "time-ordering"]
     },
     {
         "id": "distributed-consensus",
@@ -651,6 +662,29 @@ function renderSystems() {
         // Category-specific styling
         const categoryClass = `category-${sys.category.toLowerCase()}`;
         
+        // Show ADR badge and stats if available
+        const adrBadge = sys.metadata?.adrNumber ? `<span class="badge badge-tag bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200">📋 ${sys.metadata.adrNumber}</span>` : '';
+        const statsDisplay = sys.stats ? `
+            <div class="grid grid-cols-2 gap-2 p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg text-xs mb-4">
+                <div class="flex flex-col">
+                    <span class="text-zinc-400 text-[10px]">Throughput</span>
+                    <span class="font-bold text-cyan-600 dark:text-cyan-400">${sys.stats.throughput}</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-zinc-400 text-[10px]">Latency</span>
+                    <span class="font-bold text-green-600 dark:text-green-400">${sys.stats.latency}</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-zinc-400 text-[10px]">Cost</span>
+                    <span class="font-bold text-orange-600 dark:text-orange-400">${sys.stats.cost}</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-zinc-400 text-[10px]">Savings</span>
+                    <span class="font-bold text-purple-600 dark:text-purple-400">${sys.stats.savings}</span>
+                </div>
+            </div>
+        ` : '';
+        
         return `
         <div class="card-surface rounded-3xl p-8 flex flex-col h-full relative ${categoryClass}">
             <button onclick="toggleFavorite('${sys.id}')" class="favorite-star ${isFav ? 'is-favorite' : ''}">
@@ -664,10 +698,13 @@ function renderSystems() {
             <div class="flex items-center gap-2 mb-3">
                 <span class="text-[10px] font-bold uppercase tracking-widest" style="color: var(--category-color, var(--brand-primary))">${sys.category}</span>
                 <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${difficultyColor}">${sys.difficulty}</span>
+                ${adrBadge}
             </div>
             
             <h3 class="text-xl font-bold mb-3 tracking-tight">${sys.title}</h3>
             <p class="text-sm leading-relaxed mb-4 text-zinc-500 dark:text-zinc-400 font-medium">${sys.description}</p>
+            
+            ${statsDisplay}
             
             <div class="flex flex-wrap gap-1 mb-6">
                 ${sys.tags.slice(0, 3).map(tag => `<span class="badge badge-tag">${tag}</span>`).join('')}
@@ -721,8 +758,8 @@ function showDetail(id) {
         <div class="mb-16">
             <div class="flex items-start justify-between gap-4 mb-6">
                 <div class="inline-flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
-                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">Decision Record • ${sys.id.toUpperCase()}</span>
+                    <span class="w-2 h-2 rounded-full bg-cyan-600"></span>
+                    <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">${sys.metadata?.adrNumber || 'Decision Record'} • ${sys.id.toUpperCase()}</span>
                 </div>
                 <button onclick="toggleFavoriteDetail('${id}')" class="favorite-star ${isFav ? 'is-favorite' : ''} relative">
                     <i data-lucide="star" class="w-6 h-6 ${isFav ? 'fill-current' : ''}"></i>
@@ -733,7 +770,44 @@ function showDetail(id) {
                 <span class="badge badge-${sys.difficulty}">${sys.difficulty}</span>
                 ${sys.tags.map(tag => `<span class="badge badge-tag">${tag}</span>`).join('')}
                 <span class="text-sm text-zinc-400"><i data-lucide="clock" class="w-4 h-4 inline"></i> ${calculateReadTime(sys)}</span>
+                ${sys.metadata?.status ? `<span class="badge bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">✅ ${sys.metadata.status}</span>` : ''}
             </div>
+            
+            ${sys.adr.filePath ? `
+            <div class="p-4 bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-800 rounded-xl mb-8">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="file-text" class="w-5 h-5 text-cyan-600"></i>
+                    <div class="flex-1">
+                        <div class="font-semibold text-zinc-900 dark:text-white">Complete Architecture Decision Record</div>
+                        <div class="text-sm text-zinc-600 dark:text-zinc-400">Full details with cost analysis, production incidents, and failure modes</div>
+                    </div>
+                    <button onclick="showADR('${sys.adr.filePath}', '${sys.title}', '${sys.id}')" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-sm font-semibold transition-colors inline-flex items-center gap-2">
+                        Read Full ADR <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+            ` : ''}
+            
+            ${sys.stats ? `
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800 dark:to-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-700 mb-8">
+                <div class="text-center">
+                    <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Throughput</div>
+                    <div class="text-2xl font-bold text-cyan-600 dark:text-cyan-400">${sys.stats.throughput}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Latency</div>
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400">${sys.stats.latency}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Cost</div>
+                    <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">${sys.stats.cost}</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Savings</div>
+                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">${sys.stats.savings}</div>
+                </div>
+            </div>
+            ` : ''}
         </div>
         
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-16">
@@ -741,7 +815,10 @@ function showDetail(id) {
                 <section><h2>The Problem</h2><p class="font-bold text-zinc-900 dark:text-white">${sys.adr.problem}</p></section>
                 <section><h2>Engineering Context</h2><p>${sys.adr.context}</p></section>
                 <section><h2>Proposed Decision</h2><p>${sys.adr.decision}</p></section>
-                <section><h2>Implementation Logic</h2>${sys.adr.architecture}</section>
+                
+                ${sys.adr.alternatives ? `<section><h2>Alternatives Considered</h2><p>${sys.adr.alternatives}</p></section>` : ''}
+                
+                ${sys.adr.architecture ? `<section><h2>Implementation Logic</h2>${sys.adr.architecture}</section>` : ''}
                 
                 ${relatedSystems.length > 0 ? `
                 <section class="mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-800">
@@ -841,6 +918,323 @@ function toggleFavoriteDetail(id) {
 function saveNotes(id) {
     const notes = document.getElementById('userNotes').value;
     StorageManager.saveNotes(id, notes);
+}
+
+/**
+ * Parse ADR markdown into styled HTML sections
+ */
+function parseADRToHTML(markdown) {
+    // Configure marked with GFM for proper link and checkbox handling
+    marked.use({
+        gfm: true,
+        breaks: true
+    });
+    
+    const sections = [];
+    const lines = markdown.split('\n');
+    let currentSection = null;
+    let currentContent = [];
+    
+    for (let line of lines) {
+        if (line.startsWith('## ')) {
+            // Save previous section
+            if (currentSection) {
+                sections.push({ title: currentSection, content: currentContent.join('\n') });
+            }
+            // Start new section - remove all emojis and extra whitespace
+            currentSection = line
+                .replace('## ', '')
+                .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\uFE0F]/gu, '')
+                .trim();
+            currentContent = [];
+        } else if (currentSection) {
+            currentContent.push(line);
+        }
+    }
+    
+    // Save last section
+    if (currentSection) {
+        sections.push({ title: currentSection, content: currentContent.join('\n') });
+    }
+    
+    // Render sections
+    return sections.map((section, index) => {
+        const html = marked.parse(section.content);
+        const sectionId = `adr-section-${index}`;
+        
+        // Choose styling based on section type
+        if (section.title.includes('Context') || section.title.includes('Problem')) {
+            return `
+                <details class="mb-6 group" ${index < 3 ? 'open' : ''}>
+                    <summary class="cursor-pointer list-none p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-black flex items-center gap-3">
+                                <span class="w-1 h-6 bg-cyan-600 rounded-full"></span>
+                                ${section.title}
+                            </h2>
+                            <i data-lucide="chevron-down" class="w-5 h-5 transition-transform group-open:rotate-180"></i>
+                        </div>
+                    </summary>
+                    <div class="mt-3 p-6 bg-white dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-zinc-700 prose prose-zinc dark:prose-invert max-w-none">
+                        ${html}
+                    </div>
+                </details>
+            `;
+        } else if (section.title.includes('Decision')) {
+            return `
+                <details class="mb-6 group" ${index < 3 ? 'open' : ''}>
+                    <summary class="cursor-pointer list-none p-4 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20 rounded-xl border border-cyan-200 dark:border-cyan-800 hover:from-cyan-100 hover:to-blue-100 dark:hover:from-cyan-950/30 dark:hover:to-blue-950/30 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-black flex items-center gap-3">
+                                <span class="w-1 h-6 bg-cyan-600 rounded-full"></span>
+                                ${section.title}
+                            </h2>
+                            <i data-lucide="chevron-down" class="w-5 h-5 transition-transform group-open:rotate-180"></i>
+                        </div>
+                    </summary>
+                    <div class="mt-3 p-6 bg-white dark:bg-zinc-950 rounded-xl border border-cyan-200 dark:border-cyan-800 prose prose-zinc dark:prose-invert max-w-none">
+                        ${html}
+                    </div>
+                </details>
+            `;
+        } else if (section.title.includes('Rationale') || section.title.includes('Why')) {
+            return `
+                <details class="mb-6 group">
+                    <summary class="cursor-pointer list-none p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-950/30 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-black flex items-center gap-3">
+                                <span class="w-1 h-6 bg-cyan-600 rounded-full"></span>
+                                ${section.title}
+                            </h2>
+                            <i data-lucide="chevron-down" class="w-5 h-5 transition-transform group-open:rotate-180"></i>
+                        </div>
+                    </summary>
+                    <div class="mt-3 p-6 bg-white dark:bg-zinc-950 rounded-xl border border-blue-200 dark:border-blue-800 prose prose-zinc dark:prose-invert max-w-none">
+                        ${html}
+                    </div>
+                </details>
+            `;
+        } else if (section.title.includes('Consequence')) {
+            return `
+                <details class="mb-6 group">
+                    <summary class="cursor-pointer list-none p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 rounded-xl border border-purple-200 dark:border-purple-800 hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-950/30 dark:hover:to-pink-950/30 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-black flex items-center gap-3">
+                                <span class="w-1 h-6 bg-cyan-600 rounded-full"></span>
+                                ${section.title}
+                            </h2>
+                            <i data-lucide="chevron-down" class="w-5 h-5 transition-transform group-open:rotate-180"></i>
+                        </div>
+                    </summary>
+                    <div class="mt-3 p-6 bg-white dark:bg-zinc-950 rounded-xl border border-purple-200 dark:border-purple-800 prose prose-zinc dark:prose-invert max-w-none">
+                        ${html}
+                    </div>
+                </details>
+            `;
+        } else if (section.title.includes('Alternative')) {
+            return `
+                <details class="mb-6 group">
+                    <summary class="cursor-pointer list-none p-4 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-950/30 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-black flex items-center gap-3">
+                                <span class="w-1 h-6 bg-cyan-600 rounded-full"></span>
+                                ${section.title}
+                            </h2>
+                            <i data-lucide="chevron-down" class="w-5 h-5 transition-transform group-open:rotate-180"></i>
+                        </div>
+                    </summary>
+                    <div class="mt-3 p-6 bg-white dark:bg-zinc-950 rounded-xl border border-amber-200 dark:border-amber-800 prose prose-zinc dark:prose-invert max-w-none">
+                        ${html}
+                    </div>
+                </details>
+            `;
+        } else if (section.title.includes('Implementation') || section.title.includes('Capacity')) {
+            return `
+                <details class="mb-6 group">
+                    <summary class="cursor-pointer list-none p-4 bg-green-50 dark:bg-green-950/20 rounded-xl border border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-950/30 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-black flex items-center gap-3">
+                                <span class="w-1 h-6 bg-cyan-600 rounded-full"></span>
+                                ${section.title}
+                            </h2>
+                            <i data-lucide="chevron-down" class="w-5 h-5 transition-transform group-open:rotate-180"></i>
+                        </div>
+                    </summary>
+                    <div class="mt-3 p-6 bg-white dark:bg-zinc-950 rounded-xl border border-green-200 dark:border-green-800 prose prose-zinc dark:prose-invert max-w-none">
+                        ${html}
+                    </div>
+                </details>
+            `;
+        } else if (section.title.includes('Break') || section.title.includes('Failure')) {
+            return `
+                <details class="mb-6 group">
+                    <summary class="cursor-pointer list-none p-4 bg-red-50 dark:bg-red-950/20 rounded-xl border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-black flex items-center gap-3">
+                                <span class="w-1 h-6 bg-cyan-600 rounded-full"></span>
+                                ${section.title}
+                            </h2>
+                            <i data-lucide="chevron-down" class="w-5 h-5 transition-transform group-open:rotate-180"></i>
+                        </div>
+                    </summary>
+                    <div class="mt-3 p-6 bg-white dark:bg-zinc-950 rounded-xl border border-red-200 dark:border-red-800 prose prose-zinc dark:prose-invert max-w-none">
+                        ${html}
+                    </div>
+                </details>
+            `;
+        } else {
+            // Default styling for other sections
+            return `
+                <details class="mb-6 group">
+                    <summary class="cursor-pointer list-none p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-black flex items-center gap-3">
+                                <span class="w-1 h-6 bg-cyan-600 rounded-full"></span>
+                                ${section.title}
+                            </h2>
+                            <i data-lucide="chevron-down" class="w-5 h-5 transition-transform group-open:rotate-180"></i>
+                        </div>
+                    </summary>
+                    <div class="mt-3 p-6 bg-white dark:bg-zinc-950 rounded-xl border border-zinc-200 dark:border-zinc-700 prose prose-zinc dark:prose-invert max-w-none">
+                        ${html}
+                    </div>
+                </details>
+            `;
+        }
+    }).join('');
+}
+
+/**
+ * Show ADR with custom HTML styling (not markdown prose)
+ */
+async function showADR(filePath, title, systemId) {
+    const view = document.getElementById('detailView');
+    const catalog = document.getElementById('catalogView');
+    const hero = document.getElementById('catalogHero');
+    const content = document.getElementById('detailContent');
+    
+    const sys = SYSTEMS.find(s => s.id === systemId);
+    if (!sys) return;
+    
+    try {
+        const response = await fetch(filePath);
+        const markdown = await response.text();
+        
+        content.innerHTML = `
+            <div class="max-w-5xl mx-auto">
+                <!-- Sticky Header -->
+                <div class="sticky top-0 z-10 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 -mx-8 px-8 py-4 mb-8">
+                    <button onclick="showDetail('${systemId}')" class="inline-flex items-center gap-2 text-zinc-600 dark:text-zinc-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Pattern
+                    </button>
+                </div>
+                
+                <!-- Header -->
+                <div class="mb-12">
+                    <div class="inline-flex items-center gap-2 mb-3">
+                        <span class="w-2 h-2 rounded-full bg-cyan-600"></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400">Architecture Decision Record</span>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-black tracking-tight leading-tight mb-4">${title}</h1>
+                    <div class="flex gap-2 flex-wrap">
+                        <span class="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-sm font-semibold">✅ Production</span>
+                        <span class="px-3 py-1 bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 rounded-full text-sm">January 2026</span>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+                    <div class="p-6 rounded-2xl bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-950/20 dark:to-cyan-900/10 border border-cyan-200 dark:border-cyan-800">
+                        <div class="text-sm text-cyan-600 dark:text-cyan-400 mb-1 font-medium">Throughput</div>
+                        <div class="text-2xl font-black text-cyan-900 dark:text-cyan-100 break-words">${sys.stats.throughput}</div>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/10 border border-green-200 dark:border-green-800">
+                        <div class="text-sm text-green-600 dark:text-green-400 mb-1 font-medium">Latency</div>
+                        <div class="text-2xl font-black text-green-900 dark:text-green-100 break-words">${sys.stats.latency}</div>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/20 dark:to-orange-900/10 border border-orange-200 dark:border-orange-800">
+                        <div class="text-sm text-orange-600 dark:text-orange-400 mb-1 font-medium">Cost</div>
+                        <div class="text-2xl font-black text-orange-900 dark:text-orange-100 break-words">${sys.stats.cost}</div>
+                    </div>
+                    <div class="p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/20 dark:to-purple-900/10 border border-purple-200 dark:border-purple-800">
+                        <div class="text-sm text-purple-600 dark:text-purple-400 mb-1 font-medium">Savings</div>
+                        <div class="text-2xl font-black text-purple-900 dark:text-purple-100 break-words">${sys.stats.savings}</div>
+                    </div>
+                </div>
+                
+                <!-- Section Controls -->
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-zinc-200 dark:border-zinc-700">
+                    <h2 class="text-lg font-black text-zinc-700 dark:text-zinc-300">Documentation Sections</h2>
+                    <button id="toggleAllSections" class="px-4 py-2 text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-950/20 rounded-lg transition-colors flex items-center gap-2 border border-cyan-200 dark:border-cyan-800">
+                        <i data-lucide="chevrons-down-up" class="w-4 h-4"></i>
+                        <span>Collapse All</span>
+                    </button>
+                </div>
+                
+                <!-- Parsed ADR Content -->
+                ${parseADRToHTML(markdown)}
+            </div>
+        `;
+        
+        catalog.classList.add('hidden');
+        hero.classList.add('hidden');
+        view.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        lucide.createIcons();
+        
+        // Make external links open in new tab and enable checkboxes
+        setTimeout(() => {
+            document.querySelectorAll('.prose a[href^="http://"], .prose a[href^="https://"]').forEach(link => {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+            });
+            
+            // Enable checkboxes
+            document.querySelectorAll('.prose input[type="checkbox"]').forEach(checkbox => {
+                checkbox.removeAttribute('disabled');
+            });
+            
+            // Setup toggle all sections button
+            const toggleBtn = document.getElementById('toggleAllSections');
+            if (toggleBtn) {
+                let allExpanded = true; // Start with true since first 3 are open
+                
+                toggleBtn.addEventListener('click', () => {
+                    const allSections = document.querySelectorAll('#detailView details');
+                    
+                    allSections.forEach(section => {
+                        if (allExpanded) {
+                            section.removeAttribute('open');
+                        } else {
+                            section.setAttribute('open', '');
+                        }
+                    });
+                    
+                    allExpanded = !allExpanded;
+                    const icon = toggleBtn.querySelector('i');
+                    const text = toggleBtn.querySelector('span');
+                    
+                    if (allExpanded) {
+                        icon.setAttribute('data-lucide', 'chevrons-down-up');
+                        text.textContent = 'Collapse All';
+                    } else {
+                        icon.setAttribute('data-lucide', 'chevrons-up-down');
+                        text.textContent = 'Expand All';
+                    }
+                    
+                    lucide.createIcons();
+                });
+            }
+        }, 100);
+    } catch (error) {
+        console.error('Error loading ADR:', error);
+        content.innerHTML = `
+            <div class="text-center py-12">
+                <p class="text-red-600 dark:text-red-400">Failed to load ADR content</p>
+                <p class="text-sm text-zinc-500 mt-2">${error.message}</p>
+            </div>
+        `;
+    }
 }
 
 /**
